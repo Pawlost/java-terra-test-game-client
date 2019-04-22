@@ -1,16 +1,64 @@
-plugins {
-    id 'java'
+allprojects {
+    // Apply the java plugin to add support for Java
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'maven-publish'
+
+
+    sourceCompatibility = 11
+    targetCompatibility = 11
+
+    // In this section you declare where to find the dependencies of your project
+    repositories {
+        mavenLocal() // Mainly for snapshot Venom builds
+        jcenter()
+    }
+    dependencies {
+    // In this section you declare the dependencies for your production and test code
+        compile 'org.slf4j:slf4j-api:1.7.26'
+        // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+        testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.26'
+
+        testCompile("junit:junit:4.12")
+        testRuntime("org.junit.vintage:junit-vintage-engine:5.4.0")
+    }
 }
 
-group 'com.ritualsoftheold'
-version '1.0-SNAPSHOT'
-
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
+project(':Terra:terra-offheap') {
+    dependencies {
+        compile project(':Terra:terra-core')
+    }
+    test {
+        exclude '**/*'
+    }
 }
+
+project(':Terra:terra-meshgen') {
+    dependencies {
+        compile project(':Terra:terra-offheap')
+        compile project(':Terra:terra-core')
+    }
+    test {
+        exclude '**/*'
+    }
+}
+
+project(':Terra:terra-core') {
+    test {
+        exclude '**/*'
+    }
+}
+
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile project('Terra:terra-core')
+    compile project('Terra:terra-offheap')
+    compile project('Terra:terra-meshgen')
+
+    compile 'org.jmonkeyengine:jme3-desktop:3.2.2-stable'
+    compile 'org.jmonkeyengine:jme3-lwjgl3:3.2.2-stable'
+}
+
+test {
+    exclude '**/*'
 }

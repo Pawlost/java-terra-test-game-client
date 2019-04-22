@@ -1,4 +1,5 @@
+
+apply from: 'Terra/settings.gradle'
 rootProject.name = 'TestGame'
 
-include 'Terra'
-include 'Weltschmerz'
+include 'Terra:terra-core', 'Terra:terra-offheap', 'Terra:terra-meshgen'
