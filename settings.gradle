@@ -1,0 +1,4 @@
+rootProject.name = 'TestGame'
+
+include 'Terra'
+include 'Weltschmerz'
