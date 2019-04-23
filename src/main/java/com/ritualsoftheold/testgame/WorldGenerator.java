@@ -8,9 +8,11 @@ import com.ritualsoftheold.terra.core.gen.tasks.Pipeline;
 import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.core.material.TerraMaterial;
 import com.ritualsoftheold.terra.offheap.DataConstants;
+import com.ritualsoftheold.weltschmerz.core.Weltschmerz;
 
 public class WorldGenerator implements WorldGeneratorInterface<Void> {
 
+    private Weltschmerz weltschmerz;
     private TerraMaterial dirt;
     private TerraMaterial air;
     private TerraMaterial grass;
@@ -18,6 +20,7 @@ public class WorldGenerator implements WorldGeneratorInterface<Void> {
 
     @Override
     public void setup(long seed, MaterialRegistry materialRegistry) {
+       // weltschmerz = new Weltschmerz();
         dirt = materialRegistry.getMaterial("testgame:dirt");
         grass = materialRegistry.getMaterial("testgame:grass");
     }

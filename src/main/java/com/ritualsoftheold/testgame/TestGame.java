@@ -41,7 +41,6 @@ import java.util.concurrent.ForkJoinPool;
 public class TestGame extends SimpleApplication implements ActionListener {
 
     private OffheapWorld world;
-    private LoadMarker player;
     private boolean wireframe = false;
     private Material mat;
 
@@ -110,10 +109,11 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 })
                 .build();
 
-        player = world.createLoadMarker(0, 0, 0, 1, 1, 0);
+        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 64, 64, 0);
+
         // LoadMarker secondchunk = world.createLoadMarker(56+16+32,0, 56+16+32, 32, 32, 0);
 
-        world.addLoadMarker(player);
+        world.addLoadMarker(chunk);
         //  world.addLoadMarker(secondchunk);
 
         VoxelMesher mesher = new GreedyMesher();
@@ -128,12 +128,12 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
             @Override
             public void chunkLoaded(OffheapChunk chunk, float x, float y, float z, LoadMarker trigger) {
-                Vector3f center = cam.getLocation();
-                if (Math.abs(x - center.x) > 128
+                //Vector3f center = cam.getLocation();
+              /*  if (Math.abs(x - center.x) > 128
                         || Math.abs(y - center.y) > 128
                         || Math.abs(z - center.z) > 128) {
                     return;
-                }
+                */
 
                 //System.out.println("Loaded chunk: " + chunk.memoryAddress());
                 MeshContainer container = new MeshContainer();
@@ -183,7 +183,6 @@ public class TestGame extends SimpleApplication implements ActionListener {
         rootNode.setCullHint(CullHint.Never);
 
         List<CompletableFuture<Void>> markers = world.updateLoadMarkers();
-        markers.forEach(CompletableFuture::join);
 
         inputManager.addMapping("RELOAD", new KeyTrigger(KeyInput.KEY_G));
         inputManager.addListener(this, "RELOAD");
@@ -195,24 +194,25 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
     @Override
     public void simpleUpdate(float tpf) {
-        loadMarkersUpdated += tpf;
+       /* loadMarkersUpdated += tpf;
         if (loadMarkersUpdated > 1) {
             loadMarkersUpdated = 0;
             Vector3f camLoc = cam.getLocation();
             //System.out.println(camLoc);
-            player.move(camLoc.getX(), camLoc.getY(), camLoc.getZ());
+           // player.move(camLoc.getX(), camLoc.getY(), camLoc.getZ());
             //CompletableFuture.runAsync(() -> {
             //long stamp = world.enter();
             //world.updateLoadMarkers(); // Update load markers
             //world.leave(stamp);
             //});
-        }
+        }*/
 
         while (!geomCreateQueue.isEmpty()) {
             Geometry geom = geomCreateQueue.poll();
             //System.out.println("create geom: " + geom.getLocalTranslation());
             rootNode.attachChild(geom);
         }
+
     }
 
     @Override
