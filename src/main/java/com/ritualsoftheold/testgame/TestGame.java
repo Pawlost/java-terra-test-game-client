@@ -46,8 +46,6 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
     private BlockingQueue<Geometry> geomCreateQueue = new ArrayBlockingQueue<>(10000);
 
-    private float loadMarkersUpdated;
-
     public static void main(String... args) {
         TestGame app = new TestGame();
         app.showSettings = false;

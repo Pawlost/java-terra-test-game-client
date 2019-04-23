@@ -49,9 +49,9 @@ project(':Terra:terra-core') {
     }
 }
 
-project(':Weltschmerz:weltschmerz-landmass') {
+project(':Weltschmerz:weltschmerz-noise') {
     dependencies {
-        compile project(':Weltschmerz:weltschmerz-noise')
+        compile project(':Weltschmerz:weltschmerz-landmass')
     }
 }
 
