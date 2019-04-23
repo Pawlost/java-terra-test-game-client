@@ -13,8 +13,7 @@ public class WorldGenerator implements WorldGeneratorInterface<Void> {
 
     private Weltschmerz weltschmerz;
     private MaterialRegistry registry;
-    private int index;
-
+    
     @Override
     public void setup(long seed, MaterialRegistry registry) {
         this.registry = registry;
@@ -29,13 +28,10 @@ public class WorldGenerator implements WorldGeneratorInterface<Void> {
 
     public void generate(GenerationTask task, GeneratorControl control, Void nothing) {
         BlockBuffer buf = control.getBuffer();
-        System.out.println("x:" + task.getX() + " y:" + task.getY() + " z:" + task.getZ());
         int[] ids = weltschmerz.getChunk((int)task.getX(), (int)task.getY(), (int)task.getZ(), DataConstants.CHUNK_MAX_BLOCKS);
         for(int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++){
             buf.write(registry.getForWorldId(ids[i]));
             buf.next();
         }
-        index++;
-        System.out.println(index);
     }
 }
