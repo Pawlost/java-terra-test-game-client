@@ -13,7 +13,7 @@ public class WorldGenerator implements WorldGeneratorInterface<Void> {
 
     private Weltschmerz weltschmerz;
     private MaterialRegistry registry;
-    
+
     @Override
     public void setup(long seed, MaterialRegistry registry) {
         this.registry = registry;

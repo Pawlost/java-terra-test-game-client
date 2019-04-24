@@ -4,7 +4,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
-import com.jme3.light.AmbientLight;
+import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -107,7 +107,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 })
                 .build();
 
-        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 64, 64, 0);
+        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 128, 128, 0);
 
         // LoadMarker secondchunk = world.createLoadMarker(56+16+32,0, 56+16+32, 32, 32, 0);
 
@@ -177,7 +177,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
         });
 
         // Some config options
-        flyCam.setMoveSpeed(10);
+        flyCam.setMoveSpeed(40);
         rootNode.setCullHint(CullHint.Never);
 
         List<CompletableFuture<Void>> markers = world.updateLoadMarkers();
@@ -187,7 +187,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
         inputManager.addMapping("toggle wireframe", new KeyTrigger(KeyInput.KEY_T));
         inputManager.addListener(this, "toggle wireframe");
 
-        rootNode.addLight(new AmbientLight());
+        rootNode.addLight(new DirectionalLight());
     }
 
     @Override
