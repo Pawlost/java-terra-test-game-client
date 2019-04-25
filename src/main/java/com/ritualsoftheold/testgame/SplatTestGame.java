@@ -6,11 +6,12 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
-import com.jme3.scene.Spatial.CullHint;
-import com.jme3.scene.VertexBuffer.Type;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.VertexBuffer;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
@@ -22,8 +23,10 @@ import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.core.material.TerraTexture;
 import com.ritualsoftheold.terra.mesher.GreedyMesher;
 import com.ritualsoftheold.terra.mesher.MeshContainer;
+import com.ritualsoftheold.terra.mesher.SplatMesher;
 import com.ritualsoftheold.terra.mesher.VoxelMesher;
 import com.ritualsoftheold.terra.mesher.resource.TextureManager;
+import com.ritualsoftheold.terra.offheap.DataConstants;
 import com.ritualsoftheold.terra.offheap.chunk.ChunkBuffer;
 import com.ritualsoftheold.terra.offheap.io.dummy.DummyChunkLoader;
 import com.ritualsoftheold.terra.offheap.io.dummy.DummyOctreeLoader;
@@ -38,7 +41,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
-public class TestGame extends SimpleApplication implements ActionListener {
+public class SplatTestGame extends SimpleApplication implements ActionListener {
 
     private OffheapWorld world;
     private boolean wireframe = false;
@@ -47,7 +50,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
     private BlockingQueue<Geometry> geomCreateQueue = new ArrayBlockingQueue<>(10000);
 
     public static void main(String... args) {
-        TestGame app = new TestGame();
+        SplatTestGame app = new SplatTestGame();
         app.showSettings = false;
         app.settings = new AppSettings(true);
         app.settings.setResolution(1024, 768);
@@ -74,8 +77,8 @@ public class TestGame extends SimpleApplication implements ActionListener {
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-        mat = new Material(assetManager, "/shaders/terra/TerraArray.j3md");
-        mat.setTexture("ColorMap", atlasTexture);
+        mat = new Material(assetManager, "/shaders/terra/SplatShader.j3md");
+        mat.setFloat("VoxelSize",DataConstants.SMALLEST_BLOCK);
 
         WorldGeneratorInterface<?> gen = new WorldGenerator();
         gen.setup(0, reg);
@@ -114,7 +117,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
         world.addLoadMarker(chunk);
         //  world.addLoadMarker(secondchunk);
 
-        VoxelMesher mesher = new GreedyMesher();
+        VoxelMesher mesher = new SplatMesher();
 
         world.setLoadListener(new WorldLoadListener() {
 
@@ -139,24 +142,23 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
                 // Create mesh
                 Mesh mesh = new Mesh();
+                mesh.setMode(Mesh.Mode.Points);
 
                 //Set coordinates
                 Vector3f[] vector3fs = new Vector3f[container.getVector3fs().toArray().length];
                 container.getVector3fs().toArray(vector3fs);
-                mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vector3fs));
+                mesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(vector3fs));
+
+                ColorRGBA[] colorRGBAs = new ColorRGBA[container.getColors().toArray().length];
+                container.getColors().toArray(colorRGBAs);
+                mesh.setBuffer(VertexBuffer.Type.Color,4,BufferUtils.createFloatBuffer(colorRGBAs));
                 //Connects triangles
-                Integer[] integers = new Integer[container.getIndices().toArray().length];
-                container.getIndices().toArray(integers);
-                int[] indices = new int[container.getIndices().size()];
-                for (int i = 0; i < container.getIndices().size(); i++) {
-                    indices[i] = integers[i];
-                }
-                mesh.setBuffer(Type.Index, 2, BufferUtils.createIntBuffer(indices));
+
 
                 //Set texture scale and type
-                Vector3f[] vector2fs = new Vector3f[container.getTextureCoordinates().toArray().length];
-                container.getTextureCoordinates().toArray(vector2fs);
-                mesh.setBuffer(Type.TexCoord, 3, BufferUtils.createFloatBuffer(vector2fs));
+//                Vector3f[] vector2fs = new Vector3f[container.getTextureCoordinates().toArray().length];
+//                container.getTextureCoordinates().toArray(vector2fs);
+//                mesh.setBuffer(VertexBuffer.Type.TexCoord, 3, BufferUtils.createFloatBuffer(vector2fs));
 
                 //Update mesh
                 mesh.updateBound();
@@ -169,7 +171,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
                 //Set chunk position in world
                 geom.setLocalTranslation(x, y, z);
-                geom.setCullHint(CullHint.Never);
+                geom.setCullHint(Spatial.CullHint.Never);
 
                 // Place geometry in queue for main thread
                 geomCreateQueue.add(geom);
@@ -178,7 +180,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
         // Some config options
         flyCam.setMoveSpeed(50);
-        rootNode.setCullHint(CullHint.Never);
+        rootNode.setCullHint(Spatial.CullHint.Never);
 
         List<CompletableFuture<Void>> markers = world.updateLoadMarkers();
 
