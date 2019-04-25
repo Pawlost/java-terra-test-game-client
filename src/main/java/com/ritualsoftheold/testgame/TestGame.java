@@ -4,13 +4,16 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
-import com.jme3.light.DirectionalLight;
+import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue;
+import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer.Type;
+import com.jme3.scene.control.CameraControl;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
@@ -74,8 +77,9 @@ public class TestGame extends SimpleApplication implements ActionListener {
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-        mat = new Material(assetManager, "/shaders/terra/TerraArray.j3md");
-        mat.setTexture("ColorMap", atlasTexture);
+       mat = new Material(assetManager, "/shaders/terra/TerraArray.j3md");
+
+       mat.setTexture("ColorMap", atlasTexture);
 
         WorldGeneratorInterface<?> gen = new WorldGenerator();
         gen.setup(0, reg);
@@ -168,6 +172,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 geom.setMaterial(mat);
 
                 //Set chunk position in world
+                geom.setShadowMode(RenderQueue.ShadowMode.Cast);
                 geom.setLocalTranslation(x, y, z);
                 geom.setCullHint(CullHint.Never);
 
@@ -182,12 +187,15 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
         List<CompletableFuture<Void>> markers = world.updateLoadMarkers();
 
+        rootNode.addLight(new AmbientLight());
+
         inputManager.addMapping("RELOAD", new KeyTrigger(KeyInput.KEY_G));
         inputManager.addListener(this, "RELOAD");
         inputManager.addMapping("toggle wireframe", new KeyTrigger(KeyInput.KEY_T));
         inputManager.addListener(this, "toggle wireframe");
 
-        rootNode.addLight(new DirectionalLight());
+        CameraNode cameraNode = new CameraNode("Main Camera", getCamera());
+        cameraNode.setControlDir(CameraControl.ControlDirection.SpatialToCamera);
     }
 
     @Override
