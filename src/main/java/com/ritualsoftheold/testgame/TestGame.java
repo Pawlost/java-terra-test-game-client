@@ -77,9 +77,11 @@ public class TestGame extends SimpleApplication implements ActionListener {
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-       mat = new Material(assetManager, "/shaders/terra/TerraArray.j3md");
+//       mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
+        mat = new Material(assetManager, "/shaders/terra/TerraArray.j3md");
+        mat.setTexture("ColorMap", atlasTexture);
 
-       mat.setTexture("ColorMap", atlasTexture);
+//       mat.setTexture("ColorMap", atlasTexture);
 
         WorldGeneratorInterface<?> gen = new WorldGenerator();
         gen.setup(0, reg);
@@ -156,6 +158,11 @@ public class TestGame extends SimpleApplication implements ActionListener {
                     indices[i] = integers[i];
                 }
                 mesh.setBuffer(Type.Index, 2, BufferUtils.createIntBuffer(indices));
+
+                //Normals
+                Vector3f[] norm = new Vector3f[container.getNormals().toArray().length];
+                container.getNormals().toArray(norm);
+                mesh.setBuffer(Type.Normal,3,BufferUtils.createFloatBuffer(norm));
 
                 //Set texture scale and type
                 Vector3f[] vector2fs = new Vector3f[container.getTextureCoordinates().toArray().length];
