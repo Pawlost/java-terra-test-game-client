@@ -113,7 +113,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 })
                 .build();
 
-        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 128, 128, 0);
+        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 160, 160, 0);
 
         // LoadMarker secondchunk = world.createLoadMarker(56+16+32,0, 56+16+32, 32, 32, 0);
 
@@ -189,7 +189,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
         });
 
         // Some config options
-        flyCam.setMoveSpeed(40);
+        flyCam.setMoveSpeed(10);
         rootNode.setCullHint(CullHint.Never);
 
         List<CompletableFuture<Void>> markers = world.updateLoadMarkers();
