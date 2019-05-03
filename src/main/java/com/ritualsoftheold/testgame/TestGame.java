@@ -63,6 +63,12 @@ public class TestGame extends SimpleApplication implements ActionListener {
     public void simpleInitApp() {
         //setDisplayFps(false);
         //setDisplayStatView(false);
+        rootNode.addLight(new AmbientLight());
+
+        inputManager.addMapping("RELOAD", new KeyTrigger(KeyInput.KEY_G));
+        inputManager.addListener(this, "RELOAD");
+        inputManager.addMapping("toggle wireframe", new KeyTrigger(KeyInput.KEY_T));
+        inputManager.addListener(this, "toggle wireframe");
 
         TerraModule mod = new TerraModule("testgame");
         mod.newMaterial().name("dirt").texture(new TerraTexture(256, 256, "NorthenForestDirt256px.png"));
@@ -77,11 +83,8 @@ public class TestGame extends SimpleApplication implements ActionListener {
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-//       mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
         mat = new Material(assetManager, "/shaders/terra/TerraArray.j3md");
         mat.setTexture("ColorMap", atlasTexture);
-
-//       mat.setTexture("ColorMap", atlasTexture);
 
         WorldGeneratorInterface<?> gen = new WorldGenerator();
         gen.setup(0, reg);
@@ -113,7 +116,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 })
                 .build();
 
-        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 160, 160, 0);
+        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 64, 64, 0);
 
         // LoadMarker secondchunk = world.createLoadMarker(56+16+32,0, 56+16+32, 32, 32, 0);
 
@@ -192,17 +195,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
         flyCam.setMoveSpeed(10);
         rootNode.setCullHint(CullHint.Never);
 
-        List<CompletableFuture<Void>> markers = world.updateLoadMarkers();
-
-        rootNode.addLight(new AmbientLight());
-
-        inputManager.addMapping("RELOAD", new KeyTrigger(KeyInput.KEY_G));
-        inputManager.addListener(this, "RELOAD");
-        inputManager.addMapping("toggle wireframe", new KeyTrigger(KeyInput.KEY_T));
-        inputManager.addListener(this, "toggle wireframe");
-
-        CameraNode cameraNode = new CameraNode("Main Camera", getCamera());
-        cameraNode.setControlDir(CameraControl.ControlDirection.SpatialToCamera);
+        world.updateLoadMarkers();
     }
 
     @Override
