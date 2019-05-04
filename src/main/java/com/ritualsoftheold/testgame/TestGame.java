@@ -8,12 +8,10 @@ import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
-import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer.Type;
-import com.jme3.scene.control.CameraControl;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
@@ -64,11 +62,6 @@ public class TestGame extends SimpleApplication implements ActionListener {
         //setDisplayFps(false);
         //setDisplayStatView(false);
         rootNode.addLight(new AmbientLight());
-
-        inputManager.addMapping("RELOAD", new KeyTrigger(KeyInput.KEY_G));
-        inputManager.addListener(this, "RELOAD");
-        inputManager.addMapping("toggle wireframe", new KeyTrigger(KeyInput.KEY_T));
-        inputManager.addListener(this, "toggle wireframe");
 
         TerraModule mod = new TerraModule("testgame");
         mod.newMaterial().name("dirt").texture(new TerraTexture(256, 256, "NorthenForestDirt256px.png"));
@@ -190,6 +183,12 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 geomCreateQueue.add(geom);
             }
         });
+
+
+        inputManager.addMapping("RELOAD", new KeyTrigger(KeyInput.KEY_G));
+        inputManager.addListener(this, "RELOAD");
+        inputManager.addMapping("toggle wireframe", new KeyTrigger(KeyInput.KEY_T));
+        inputManager.addListener(this, "toggle wireframe");
 
         // Some config options
         flyCam.setMoveSpeed(10);

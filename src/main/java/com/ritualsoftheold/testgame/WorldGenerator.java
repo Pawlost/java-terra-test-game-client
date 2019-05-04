@@ -28,13 +28,15 @@ public class WorldGenerator implements WorldGeneratorInterface<Void> {
 
     public void generate(GenerationTask task, GeneratorControl control, Void nothing) {
         BlockBuffer buf = control.getBuffer();
-        weltschmerz.setSector(0, (int)task.getY(), 0);
-        for(int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++){
-            int x = i%64;
-            int z = i/4096;
-            int y = (i - 4096 * z) / 64;
-            buf.write(registry.getForWorldId(weltschmerz.generateVoxel(x, y , z)));
-            buf.next();
+        control.canGenerate(weltschmerz.setChunk((int)task.getX(), (int) task.getY(), (int)task.getZ()));
+        if (control.isGenerated()) {
+            for (int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++) {
+                int x = i % 64;
+                int z = i / 4096;
+                int y = (i - 4096 * z) / 64;
+                buf.write(registry.getForWorldId(weltschmerz.generateVoxel(x, y, z)));
+                buf.next();
+            }
         }
     }
 }
