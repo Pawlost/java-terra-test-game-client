@@ -90,7 +90,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 .chunkLoader(new DummyChunkLoader())
                 .octreeLoader(new DummyOctreeLoader(32768))
                 .storageExecutor(ForkJoinPool.commonPool())
-                .chunkStorage(bufferBuilder, 128)
+                .chunkStorage(bufferBuilder, 10000000)
                 .octreeStorage(32768)
                 .generator(gen)
                 .generatorExecutor(ForkJoinPool.commonPool())
@@ -109,7 +109,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 })
                 .build();
 
-        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 64, 64, 0);
+        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 250, 250, 0);
 
         // LoadMarker secondchunk = world.createLoadMarker(56+16+32,0, 56+16+32, 32, 32, 0);
 
