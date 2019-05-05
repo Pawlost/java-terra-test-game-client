@@ -33,10 +33,8 @@ import com.ritualsoftheold.terra.offheap.node.OffheapChunk;
 import com.ritualsoftheold.terra.offheap.world.OffheapWorld;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 
-import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
 public class TestGame extends SimpleApplication implements ActionListener {
@@ -44,6 +42,11 @@ public class TestGame extends SimpleApplication implements ActionListener {
     private OffheapWorld world;
     private boolean wireframe = false;
     private Material mat;
+    private int loadMarkersUpdated;
+    private LoadMarker[][] sectors;
+    private LoadMarker primarySector;
+    private TextureManager texManager;
+    private MaterialRegistry reg;
 
     private BlockingQueue<Geometry> geomCreateQueue = new ArrayBlockingQueue<>(10000);
 
@@ -61,24 +64,61 @@ public class TestGame extends SimpleApplication implements ActionListener {
     public void simpleInitApp() {
         //setDisplayFps(false);
         //setDisplayStatView(false);
+        sectors = new LoadMarker[3][3];
+
         rootNode.addLight(new AmbientLight());
+        rootNode.setCullHint(CullHint.Never);
 
-        TerraModule mod = new TerraModule("testgame");
-        mod.newMaterial().name("dirt").texture(new TerraTexture(256, 256, "NorthenForestDirt256px.png"));
-        mod.newMaterial().name("grass").texture(new TerraTexture(256, 256, "NorthenForestGrass256px.png"));
+        setupKeyMapping();
+        setupMaterials();
+        setupWorld();
+        setupGenerator();
 
-        MaterialRegistry reg = new MaterialRegistry();
-        mod.registerMaterials(reg);
+        primarySector = world.createLoadMarker(0, 0, 0, 1, 1, 0);
+        updateSectors();
+        world.updateLoadMarkers();
+    }
 
-        TextureManager texManager = new TextureManager(assetManager, reg);
-        TextureArray atlasTexture = texManager.getTextureArray();
-        atlasTexture.setWrap(Texture.WrapMode.Repeat);
-        atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
-        atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+    private void updateSectors() {
+        if (sectors[1][1] != primarySector) {
+            sectors[1][1] = primarySector;
+        }
 
-        mat = new Material(assetManager, "/shaders/terra/TerraArray.j3md");
-        mat.setTexture("ColorMap", atlasTexture);
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 3; y++) {
+                if (sectors[x][y] == null) {
+                    if (x == 0 && y == 0) {
+                        sectors[x][y] = world.createLoadMarker(primarySector.getX() - primarySector.getHardRadius() * 32, primarySector.getY(),
+                                primarySector.getZ() - primarySector.getHardRadius() * 32, 1, 1, 0);
+                    } else if (x == 0 && y == 1) {
+                        sectors[x][y] = world.createLoadMarker(primarySector.getX() - primarySector.getHardRadius() * 32, primarySector.getY(),
+                                primarySector.getZ(), 1, 1, 0);
+                    } else if (x == 0) {
+                        sectors[x][y] = world.createLoadMarker(primarySector.getX() - primarySector.getHardRadius() * 32, primarySector.getY(),
+                                primarySector.getZ() + primarySector.getHardRadius() * 32, 1, 1, 0);
+                    } else if (x == 1 && y == 0) {
+                        sectors[x][y] = world.createLoadMarker(primarySector.getX(), primarySector.getY(),
+                                primarySector.getZ() - primarySector.getHardRadius() * 32, 1, 1, 0);
+                    } else if (x == 1) {
+                        sectors[x][y] = world.createLoadMarker(primarySector.getX(), primarySector.getY(),
+                                primarySector.getZ() + primarySector.getHardRadius() * 32, 1, 1, 0);
+                    } else if (y == 0) {
+                        sectors[x][y] = world.createLoadMarker(primarySector.getX() + primarySector.getHardRadius() * 32, primarySector.getY(),
+                                primarySector.getZ() - primarySector.getHardRadius() * 32, 1, 1, 0);
+                    } else if (y == 1) {
+                        sectors[x][y] = world.createLoadMarker(primarySector.getX() + primarySector.getHardRadius() * 32, primarySector.getY(),
+                                primarySector.getZ(), 1, 1, 0);
+                    } else {
+                        sectors[x][y] = world.createLoadMarker(primarySector.getX() + primarySector.getHardRadius() * 32, primarySector.getY(),
+                                primarySector.getZ() + primarySector.getHardRadius() * 32, 1, 1, 0);
+                    }
+                    world.addLoadMarker(sectors[x][y]);
+                }
+            }
+        }
+    }
 
+    private void setupWorld(){
         WorldGeneratorInterface<?> gen = new WorldGenerator();
         gen.setup(0, reg);
 
@@ -106,16 +146,10 @@ public class TestGame extends SimpleApplication implements ActionListener {
                     public PanicResult goalNotMet(long goal, long possible) {
                         return PanicResult.CONTINUE;
                     }
-                })
-                .build();
+                }).build();
+    }
 
-        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 64, 64, 0);
-
-        // LoadMarker secondchunk = world.createLoadMarker(56+16+32,0, 56+16+32, 32, 32, 0);
-
-        world.addLoadMarker(chunk);
-        //  world.addLoadMarker(secondchunk);
-
+    private void setupGenerator(){
         VoxelMesher mesher = new GreedyMesher();
 
         world.setLoadListener(new WorldLoadListener() {
@@ -128,12 +162,6 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
             @Override
             public void chunkLoaded(OffheapChunk chunk, float x, float y, float z, LoadMarker trigger) {
-                //Vector3f center = cam.getLocation();
-              /*  if (Math.abs(x - center.x) > 128
-                        || Math.abs(y - center.y) > 128
-                        || Math.abs(z - center.z) > 128) {
-                    return;
-                */
 
                 //System.out.println("Loaded chunk: " + chunk.memoryAddress());
                 MeshContainer container = new MeshContainer();
@@ -183,8 +211,27 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 geomCreateQueue.add(geom);
             }
         });
+    }
 
+    private void setupMaterials(){
+        TerraModule mod = new TerraModule("testgame");
+        mod.newMaterial().name("dirt").texture(new TerraTexture(256, 256, "NorthenForestDirt256px.png"));
+        mod.newMaterial().name("grass").texture(new TerraTexture(256, 256, "NorthenForestGrass256px.png"));
 
+        reg = new MaterialRegistry();
+        mod.registerMaterials(reg);
+
+        texManager = new TextureManager(assetManager, reg);
+        TextureArray atlasTexture = texManager.getTextureArray();
+        atlasTexture.setWrap(Texture.WrapMode.Repeat);
+        atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
+        atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+
+        mat = new Material(assetManager, "/shaders/terra/TerraArray.j3md");
+        mat.setTexture("ColorMap", atlasTexture);
+    }
+
+    private void setupKeyMapping(){
         inputManager.addMapping("RELOAD", new KeyTrigger(KeyInput.KEY_G));
         inputManager.addListener(this, "RELOAD");
         inputManager.addMapping("toggle wireframe", new KeyTrigger(KeyInput.KEY_T));
@@ -192,32 +239,21 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
         // Some config options
         flyCam.setMoveSpeed(10);
-        rootNode.setCullHint(CullHint.Never);
-
-        world.updateLoadMarkers();
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-       /* loadMarkersUpdated += tpf;
+        loadMarkersUpdated += tpf;
         if (loadMarkersUpdated > 1) {
             loadMarkersUpdated = 0;
-            Vector3f camLoc = cam.getLocation();
-            //System.out.println(camLoc);
-           // player.move(camLoc.getX(), camLoc.getY(), camLoc.getZ());
-            //CompletableFuture.runAsync(() -> {
-            //long stamp = world.enter();
-            //world.updateLoadMarkers(); // Update load markers
-            //world.leave(stamp);
-            //});
-        }*/
+         //   Vector3f camLoc = cam.getLocation();
+
+        }
 
         while (!geomCreateQueue.isEmpty()) {
             Geometry geom = geomCreateQueue.poll();
-            //System.out.println("create geom: " + geom.getLocalTranslation());
             rootNode.attachChild(geom);
         }
-
     }
 
     @Override
