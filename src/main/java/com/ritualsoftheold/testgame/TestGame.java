@@ -28,8 +28,8 @@ import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
 import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.core.material.TerraTexture;
 import com.ritualsoftheold.terra.mesher.GreedyMesher;
-import com.ritualsoftheold.terra.mesher.MeshContainer;
 import com.ritualsoftheold.terra.mesher.VoxelMesher;
+import com.ritualsoftheold.terra.mesher.resource.MeshContainer;
 import com.ritualsoftheold.terra.mesher.resource.TextureManager;
 import com.ritualsoftheold.terra.offheap.chunk.ChunkBuffer;
 import com.ritualsoftheold.terra.offheap.io.ChunkLoader;
@@ -188,8 +188,8 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 Mesh mesh = new Mesh();
 
                 //Set coordinates
-                Vector3f[] vector3fs = new Vector3f[container.getVector3fs().toArray().length];
-                container.getVector3fs().toArray(vector3fs);
+                Vector3f[] vector3fs = new Vector3f[container.getVertice().toArray().length];
+                container.getVertice().toArray(vector3fs);
                 mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vector3fs));
                 //Connects triangles
                 Integer[] integers = new Integer[container.getIndices().toArray().length];
@@ -223,6 +223,8 @@ public class TestGame extends SimpleApplication implements ActionListener {
                 geom.setShadowMode(RenderQueue.ShadowMode.Cast);
                 geom.setLocalTranslation(x, y, z);
                 geom.setCullHint(CullHint.Never);
+
+                container.clear();
 
                 // Place geometry in queue for main thread
                 geomCreateQueue.add(geom);
