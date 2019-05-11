@@ -1,5 +1,6 @@
-package com.ritualsoftheold.testgame;
+package com.ritualsoftheold.testgame.generation;
 
+import com.ritualsoftheold.terra.core.TerraModule;
 import com.ritualsoftheold.terra.core.buffer.BlockBuffer;
 import com.ritualsoftheold.terra.core.gen.interfaces.GeneratorControl;
 import com.ritualsoftheold.terra.core.gen.interfaces.world.WorldGeneratorInterface;
@@ -12,12 +13,12 @@ import com.ritualsoftheold.weltschmerz.core.Weltschmerz;
 public class WorldGenerator implements WorldGeneratorInterface<Void> {
 
     private Weltschmerz weltschmerz;
-    private MaterialRegistry registry;
+    private MaterialRegistry reg;
 
     @Override
-    public void setup(long seed, MaterialRegistry registry) {
-        this.registry = registry;
-        weltschmerz = new Weltschmerz();
+    public void setup(long seed, MaterialRegistry reg, TerraModule mod) {
+        this.reg = reg;
+        weltschmerz = new Weltschmerz(reg.getMaterial(mod, "grass").getWorldId(), reg.getMaterial(mod,"dirt").getWorldId());
     }
 
     @Override
@@ -34,7 +35,7 @@ public class WorldGenerator implements WorldGeneratorInterface<Void> {
                 int x = i % 64;
                 int z = i / 4096;
                 int y = (i - 4096 * z) / 64;
-                buf.write(registry.getForWorldId(weltschmerz.generateVoxel(x, y, z)));
+                buf.write(reg.getForWorldId(weltschmerz.generateVoxel(x, y, z)));
                 buf.next();
             }
         }

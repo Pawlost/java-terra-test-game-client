@@ -1,4 +1,4 @@
-package com.ritualsoftheold.testgame;
+package com.ritualsoftheold.testgame.utils;
 
 import com.jme3.collision.CollisionResults;
 import com.jme3.math.Vector3f;
@@ -18,13 +18,17 @@ public class Picker {
     private OffheapLoadMarker loadMarker;
     private Vector3f collision;
     private Vector3f normals;
+    private TerraMaterial primaryMaterial;
+    private TerraMaterial emptyMaterial;
     private float x;
     private float y;
     private float z;
 
-    public Picker (ChunkLoader loader, OffheapWorld world){
+    public Picker (ChunkLoader loader, OffheapWorld world, TerraMaterial primaryMaterial, TerraMaterial emptyMaterial){
         chunkLoader = loader;
         this.world = world;
+        this.primaryMaterial = primaryMaterial;
+        this.emptyMaterial = emptyMaterial;
     }
 
     public void prepare(CollisionResults results) {
@@ -38,7 +42,7 @@ public class Picker {
         normals = results.getClosestCollision().getContactNormal();
     }
 
-    public void pick(TerraMaterial material) {
+    public void pick() {
         int x = (int) ((collision.x - chunk.getX())/0.25);
         int y = (int) ((collision.y - chunk.getY())/0.25);
         int z = (int) ((collision.z - chunk.getZ())/0.25);
@@ -60,11 +64,11 @@ public class Picker {
 
         BufferWithFormat chunkBuffer = chunk.getBuffer();
         chunkBuffer.seek(x + y + z);
-        chunkBuffer.write(material);
+        chunkBuffer.write(emptyMaterial);
         chunkLoader.loadChunk(this.x, this.y, this.z, chunk, loadMarker);
     }
 
-    public void place(TerraMaterial material) {
+    public void place() {
         int x = (int) ((collision.x - chunk.getX())/0.25);
         int y = (int) ((collision.y - chunk.getY())/0.25);
         int z = (int) ((collision.z - chunk.getZ())/0.25);
@@ -88,9 +92,34 @@ public class Picker {
         if(x+y+z < DataConstants.CHUNK_MAX_BLOCKS) {
             chunkBuffer.seek(x + y + z);
             if(chunkBuffer.read().getWorldId() == 1) {
-                chunkBuffer.write(material);
+                chunkBuffer.write(primaryMaterial);
                 chunkLoader.loadChunk(this.x, this.y, this.z, chunk, loadMarker);
             }
         }
+    }
+
+    public void changeMaterial(){
+        int x = (int) ((collision.x - chunk.getX())/0.25);
+        int y = (int) ((collision.y - chunk.getY())/0.25);
+        int z = (int) ((collision.z - chunk.getZ())/0.25);
+
+        if(normals.x > 0){
+            x--;
+        }
+
+        if(normals.y > 0){
+            y--;
+        }
+
+        if(normals.z > 0){
+            z--;
+        }
+
+        y *= 64;
+        z *= 4096;
+
+        BufferWithFormat chunkBuffer = chunk.getBuffer();
+        chunkBuffer.seek(x + y + z);
+        primaryMaterial = chunkBuffer.read();
     }
 }
