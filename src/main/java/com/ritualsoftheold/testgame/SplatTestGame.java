@@ -1,17 +1,19 @@
 package com.ritualsoftheold.testgame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.collision.CollisionResults;
+import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.VertexBuffer;
+import com.jme3.scene.*;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
@@ -22,18 +24,22 @@ import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
 import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.core.material.TerraTexture;
 import com.ritualsoftheold.terra.mesher.GreedyMesher;
-import com.ritualsoftheold.terra.mesher.MeshContainer;
+import com.ritualsoftheold.terra.mesher.resource.MeshContainer;
 import com.ritualsoftheold.terra.mesher.SplatMesher;
 import com.ritualsoftheold.terra.mesher.VoxelMesher;
 import com.ritualsoftheold.terra.mesher.resource.TextureManager;
 import com.ritualsoftheold.terra.offheap.DataConstants;
 import com.ritualsoftheold.terra.offheap.chunk.ChunkBuffer;
-import com.ritualsoftheold.terra.offheap.io.dummy.DummyChunkLoader;
+import com.ritualsoftheold.terra.offheap.io.ChunkLoader;
 import com.ritualsoftheold.terra.offheap.io.dummy.DummyOctreeLoader;
 import com.ritualsoftheold.terra.offheap.memory.MemoryPanicHandler;
 import com.ritualsoftheold.terra.offheap.node.OffheapChunk;
 import com.ritualsoftheold.terra.offheap.world.OffheapWorld;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
+import com.ritualsoftheold.testgame.generation.WeltschmerzListener;
+import com.ritualsoftheold.testgame.generation.WeltschmerzListenerSplat;
+import com.ritualsoftheold.testgame.generation.WorldGenerator;
+import com.ritualsoftheold.testgame.utils.Picker;
 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -46,6 +52,14 @@ public class SplatTestGame extends SimpleApplication implements ActionListener {
     private OffheapWorld world;
     private boolean wireframe = false;
     private Material mat;
+    private int loadMarkersUpdated;
+    private WorldLoadListener listener;
+    private ChunkLoader chunkLoader;
+    private Picker picker;
+    private TextureManager texManager;
+    private MaterialRegistry reg;
+    private Node terrain;
+    private TerraModule mod;
 
     private BlockingQueue<Geometry> geomCreateQueue = new ArrayBlockingQueue<>(10000);
 
@@ -64,35 +78,40 @@ public class SplatTestGame extends SimpleApplication implements ActionListener {
         //setDisplayFps(false);
         //setDisplayStatView(false);
 
-        TerraModule mod = new TerraModule("testgame");
-        mod.newMaterial().name("dirt").texture(new TerraTexture(256, 256, "NorthenForestDirt256px.png"));
-        mod.newMaterial().name("grass").texture(new TerraTexture(256, 256, "NorthenForestGrass256px.png"));
 
-        MaterialRegistry reg = new MaterialRegistry();
-        mod.registerMaterials(reg);
+        terrain = new Node("Terrain");
+        rootNode.attachChild(terrain);
+        rootNode.addLight(new AmbientLight());
+        rootNode.setCullHint(Spatial.CullHint.Never);
 
-        TextureManager texManager = new TextureManager(assetManager, reg);
-        TextureArray atlasTexture = texManager.getTextureArray();
-        atlasTexture.setWrap(Texture.WrapMode.Repeat);
-        atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
-        atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+        initKeyMapping();
+        setupMaterials();
+        listener = new WeltschmerzListenerSplat(texManager, mat, geomCreateQueue);
+        setupWorld();
 
-        mat = new Material(assetManager, "/shaders/terra/SplatShader.j3md");
-        mat.setFloat("VoxelSize",DataConstants.SMALLEST_BLOCK);
+        picker = new Picker(chunkLoader, world,  reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
+        world.setLoadListener(listener);
+        LoadMarker player = world.createLoadMarker(0, 0, 0, 128, 128, 0);
+        world.addLoadMarker(player);
+        world.updateLoadMarkers();
+    }
+
+    private void setupWorld(){
         WorldGeneratorInterface<?> gen = new WorldGenerator();
-        gen.setup(0, reg);
+        chunkLoader = new ChunkLoader(listener);
+        gen.setup(0, reg, mod);
 
         ChunkBuffer.Builder bufferBuilder = new ChunkBuffer.Builder()
                 .maxChunks(128)
                 .queueSize(4);
 
         world = new OffheapWorld.Builder()
-                .chunkLoader(new DummyChunkLoader())
-                .octreeLoader(new DummyOctreeLoader(32768))
+                .chunkLoader(chunkLoader)
+                .octreeLoader(new DummyOctreeLoader(322768))
                 .storageExecutor(ForkJoinPool.commonPool())
-                .chunkStorage(bufferBuilder, 128)
-                .octreeStorage(32768)
+                .chunkStorage(bufferBuilder, 10000000)
+                .octreeStorage(322768)
                 .generator(gen)
                 .generatorExecutor(ForkJoinPool.commonPool())
                 .materialRegistry(reg)
@@ -107,123 +126,75 @@ public class SplatTestGame extends SimpleApplication implements ActionListener {
                     public PanicResult goalNotMet(long goal, long possible) {
                         return PanicResult.CONTINUE;
                     }
-                })
-                .build();
+                }).build();
+    }
 
-        LoadMarker chunk = world.createLoadMarker(0, 0, 0, 64, 64, 0);
+    private void setupMaterials(){
+        mod = new TerraModule("testgame");
+        mod.newMaterial().name("dirt").texture(new TerraTexture(256, 256, "NorthenForestDirt256px.png"));
+        mod.newMaterial().name("grass").texture(new TerraTexture(256, 256, "NorthenForestGrass256px.png"));
 
-        // LoadMarker secondchunk = world.createLoadMarker(56+16+32,0, 56+16+32, 32, 32, 0);
+        reg = new MaterialRegistry();
+        mod.registerMaterials(reg);
 
-        world.addLoadMarker(chunk);
-        //  world.addLoadMarker(secondchunk);
+        texManager = new TextureManager(assetManager, reg);
+        TextureArray atlasTexture = texManager.getTextureArray();
+        atlasTexture.setWrap(Texture.WrapMode.Repeat);
+        atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
+        atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-        VoxelMesher mesher = new SplatMesher();
+        mat = new Material(assetManager, "/shaders/terra/SplatShader.j3md");
+        mat.setFloat("VoxelSize",DataConstants.SMALLEST_BLOCK);
+    }
 
-        world.setLoadListener(new WorldLoadListener() {
-
-            @Override
-            public void octreeLoaded(long addr, long groupAddr, int id, float x,
-                                     float y, float z, float scale, LoadMarker trigger) {
-                // For now, just ignore octrees
-            }
-
-            @Override
-            public void chunkLoaded(OffheapChunk chunk, float x, float y, float z, LoadMarker trigger) {
-                //Vector3f center = cam.getLocation();
-              /*  if (Math.abs(x - center.x) > 128
-                        || Math.abs(y - center.y) > 128
-                        || Math.abs(z - center.z) > 128) {
-                    return;
-                */
-
-                //System.out.println("Loaded chunk: " + chunk.memoryAddress());
-                MeshContainer container = new MeshContainer();
-                mesher.chunk(chunk.getBuffer(), texManager, container);
-
-                // Create mesh
-                Mesh mesh = new Mesh();
-                mesh.setMode(Mesh.Mode.Points);
-
-                //Set coordinates
-                Vector3f[] vector3fs = new Vector3f[container.getVector3fs().toArray().length];
-                container.getVector3fs().toArray(vector3fs);
-                mesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(vector3fs));
-
-                ColorRGBA[] colorRGBAs = new ColorRGBA[container.getColors().toArray().length];
-                container.getColors().toArray(colorRGBAs);
-                mesh.setBuffer(VertexBuffer.Type.Color,4,BufferUtils.createFloatBuffer(colorRGBAs));
-                //Connects triangles
-
-
-                //Set texture scale and type
-//                Vector3f[] vector2fs = new Vector3f[container.getTextureCoordinates().toArray().length];
-//                container.getTextureCoordinates().toArray(vector2fs);
-//                mesh.setBuffer(VertexBuffer.Type.TexCoord, 3, BufferUtils.createFloatBuffer(vector2fs));
-
-                //Update mesh
-                mesh.updateBound();
-
-                // Create geometry
-                Geometry geom = new Geometry("chunk:" + x + "," + y + "," + z, mesh);
-
-                // Create material
-                geom.setMaterial(mat);
-
-                //Set chunk position in world
-                geom.setLocalTranslation(x, y, z);
-                geom.setCullHint(Spatial.CullHint.Never);
-
-                // Place geometry in queue for main thread
-                geomCreateQueue.add(geom);
-            }
-        });
-
-        // Some config options
-        flyCam.setMoveSpeed(50);
-        rootNode.setCullHint(Spatial.CullHint.Never);
-
-        List<CompletableFuture<Void>> markers = world.updateLoadMarkers();
-
+    private void initKeyMapping(){
         inputManager.addMapping("RELOAD", new KeyTrigger(KeyInput.KEY_G));
         inputManager.addListener(this, "RELOAD");
         inputManager.addMapping("toggle wireframe", new KeyTrigger(KeyInput.KEY_T));
         inputManager.addListener(this, "toggle wireframe");
 
-        rootNode.addLight(new AmbientLight());
+        inputManager.addMapping("Pick",
+                new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(this, "Pick");
+
+        inputManager.addMapping("Place",
+                new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+        inputManager.addListener(this, "Place");
+
+        inputManager.addMapping("Change",
+                new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE));
+        inputManager.addListener(this, "Change");
+
+        // Some config options
+        flyCam.setMoveSpeed(10);
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-       /* loadMarkersUpdated += tpf;
+        loadMarkersUpdated += tpf;
         if (loadMarkersUpdated > 1) {
             loadMarkersUpdated = 0;
-            Vector3f camLoc = cam.getLocation();
-            //System.out.println(camLoc);
-           // player.move(camLoc.getX(), camLoc.getY(), camLoc.getZ());
-            //CompletableFuture.runAsync(() -> {
-            //long stamp = world.enter();
-            //world.updateLoadMarkers(); // Update load markers
-            //world.leave(stamp);
-            //});
-        }*/
+            //   Vector3f camLoc = cam.getLocation();
+
+        }
 
         while (!geomCreateQueue.isEmpty()) {
             Geometry geom = geomCreateQueue.poll();
-            //System.out.println("create geom: " + geom.getLocalTranslation());
-            rootNode.attachChild(geom);
-        }
+            if(terrain.getChild(geom.getName()) != null){
+                terrain.detachChild(terrain.getChild(geom.getName()));
+            }
 
+            terrain.attachChild(geom);
+        }
     }
 
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {
-        if (name.equals("RELOAD") && isPressed) {
-            rootNode.detachAllChildren();
-            world.updateLoadMarkers();
-        }
         if (name.equals("toggle wireframe") && !isPressed) {
             wireframe = !wireframe; // toggle boolean
             mat.getAdditionalRenderState().setWireframe(wireframe);
         }
+
     }
+
 }
