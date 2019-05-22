@@ -29,8 +29,9 @@ import com.ritualsoftheold.terra.offheap.io.dummy.DummyOctreeLoader;
 import com.ritualsoftheold.terra.offheap.memory.MemoryPanicHandler;
 import com.ritualsoftheold.terra.offheap.world.OffheapWorld;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
-import com.ritualsoftheold.testgame.generation.WeltschmerzListener;
-import com.ritualsoftheold.testgame.generation.WorldGenerator;
+import com.ritualsoftheold.testgame.generation.MeshListener;
+import com.ritualsoftheold.testgame.generation.TestWorldGenerator;
+import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
 import com.ritualsoftheold.testgame.utils.Picker;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -76,19 +77,19 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
         initKeyMapping();
         setupMaterials();
-        listener = new WeltschmerzListener(texManager, mat, geomCreateQueue);
+        listener = new MeshListener(texManager, mat, geomCreateQueue);
         setupWorld();
 
         picker = new Picker(chunkLoader, world,  reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
         world.setLoadListener(listener);
-        LoadMarker player = world.createLoadMarker(0, 0, 0, 1, 1, 0);
+        LoadMarker player = world.createLoadMarker(0, 0, 0, 250, 250, 0);
         world.addLoadMarker(player);
         world.updateLoadMarkers();
     }
 
     private void setupWorld(){
-        WorldGeneratorInterface<?> gen = new WorldGenerator();
+        WorldGeneratorInterface<?> gen = new WeltschmerzWorldGenerator();
         chunkLoader = new ChunkLoader(listener);
         gen.setup(0, reg, mod);
 

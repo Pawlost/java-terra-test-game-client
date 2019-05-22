@@ -18,13 +18,13 @@ import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 
 import java.util.concurrent.BlockingQueue;
 
-public class WeltschmerzListener implements WorldLoadListener {
+public class MeshListener implements WorldLoadListener {
     private VoxelMesher mesher;
     private TextureManager texManager;
     private Material mat;
     private BlockingQueue<Geometry> geomCreateQueue;
 
-    public WeltschmerzListener(TextureManager texManager, Material mat, BlockingQueue<Geometry> geomCreateQueue) {
+    public MeshListener(TextureManager texManager, Material mat, BlockingQueue<Geometry> geomCreateQueue) {
         mesher = new GreedyMesher();
         this.texManager = texManager;
         this.mat = mat;

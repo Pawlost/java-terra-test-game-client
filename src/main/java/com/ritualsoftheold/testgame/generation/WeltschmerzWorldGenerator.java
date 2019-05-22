@@ -10,7 +10,7 @@ import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.offheap.DataConstants;
 import com.ritualsoftheold.weltschmerz.core.Weltschmerz;
 
-public class WorldGenerator implements WorldGeneratorInterface<Void> {
+public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> {
 
     private Weltschmerz weltschmerz;
     private MaterialRegistry reg;
