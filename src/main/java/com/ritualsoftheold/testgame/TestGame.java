@@ -123,8 +123,8 @@ public class TestGame extends SimpleApplication implements ActionListener {
 
     private void setupMaterials(){
         mod = new TerraModule("testgame");
-        mod.newMaterial().name("dirt").texture(new TerraTexture(256, 256, "NorthenForestDirt256px.png"));
-        mod.newMaterial().name("grass").texture(new TerraTexture(256, 256, "NorthenForestGrass256px.png"));
+        mod.newMaterial().name("dirt").texture(new TerraTexture("NorthenForestDirt256px.png"));
+        mod.newMaterial().name("grass").texture(new TerraTexture("NorthenForestGrass256px.png"));
 
         reg = new MaterialRegistry();
         mod.registerMaterials(reg);
