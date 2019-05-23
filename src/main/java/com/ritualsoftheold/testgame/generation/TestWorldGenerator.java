@@ -15,7 +15,7 @@ public class TestWorldGenerator implements WorldGeneratorInterface<Void> {
     private MaterialRegistry reg;
 
     @Override
-    public void setup(long seed, MaterialRegistry reg, TerraModule mod) {
+    public void setup(MaterialRegistry reg, TerraModule mod) {
         this.reg = reg;
     }
 
@@ -27,12 +27,9 @@ public class TestWorldGenerator implements WorldGeneratorInterface<Void> {
 
     public void generate(GenerationTask task, GeneratorControl control, Void nothing) {
         BlockBuffer buf = control.getBuffer();
-        control.canGenerate(true);
-        if (control.isGenerated()) {
-            for (int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++) {
-                buf.write(reg.getForWorldId(2));
-                buf.next();
-            }
+        for (int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++) {
+            buf.write(reg.getForWorldId(2));
+            buf.next();
         }
     }
 }

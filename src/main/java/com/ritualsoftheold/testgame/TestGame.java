@@ -51,6 +51,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
     private MaterialRegistry reg;
     private Node terrain;
     private TerraModule mod;
+    private WorldGeneratorInterface<?> gen;
 
     private BlockingQueue<Geometry> geomCreateQueue = new ArrayBlockingQueue<>(10000);
 
@@ -83,15 +84,15 @@ public class TestGame extends SimpleApplication implements ActionListener {
         picker = new Picker(chunkLoader, world,  reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
         world.setLoadListener(listener);
-        LoadMarker player = world.createLoadMarker(0, 0, 0, 250, 250, 0);
+        LoadMarker player = world.createLoadMarker(0, 0, 0, 1000, 1000, 0);
         world.addLoadMarker(player);
         world.updateLoadMarkers();
     }
 
     private void setupWorld(){
-        WorldGeneratorInterface<?> gen = new WeltschmerzWorldGenerator();
+        gen = new WeltschmerzWorldGenerator();
         chunkLoader = new ChunkLoader(listener);
-        gen.setup(0, reg, mod);
+        gen.setup(reg, mod);
 
         ChunkBuffer.Builder bufferBuilder = new ChunkBuffer.Builder()
                 .maxChunks(128)

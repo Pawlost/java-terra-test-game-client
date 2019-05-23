@@ -16,9 +16,10 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
     private MaterialRegistry reg;
 
     @Override
-    public void setup(long seed, MaterialRegistry reg, TerraModule mod) {
+    public void setup(MaterialRegistry reg, TerraModule mod) {
         this.reg = reg;
         weltschmerz = new Weltschmerz(reg.getMaterial(mod, "grass").getWorldId(), reg.getMaterial(mod,"dirt").getWorldId());
+        weltschmerz.setSector();
     }
 
     @Override
@@ -29,15 +30,13 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
 
     public void generate(GenerationTask task, GeneratorControl control, Void nothing) {
         BlockBuffer buf = control.getBuffer();
-        control.canGenerate(weltschmerz.setChunk((int)task.getX(), (int) task.getY(), (int)task.getZ()));
-        if (control.isGenerated()) {
-            for (int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++) {
-                int x = i % 64;
-                int z = i / 4096;
-                int y = (i - 4096 * z) / 64;
-                buf.write(reg.getForWorldId(weltschmerz.generateVoxel(x, y, z)));
-                buf.next();
-            }
+        weltschmerz.setChunk((int)task.getX(), (int)task.getZ());
+        for (int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++) {
+            int x = i % 64;
+            int z = i / 4096;
+            int y = (i - 4096 * z) / 64;
+            buf.write(reg.getForWorldId(weltschmerz.generateVoxel(x, y, z)));
+            buf.next();
         }
     }
 }
