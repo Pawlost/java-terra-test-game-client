@@ -85,11 +85,10 @@ public class Picker {
             z--;
         }
 
-        y *= 64;
-        z *= 4096;
-
         BufferWithFormat chunkBuffer = chunk.getBuffer();
-        if(x+y+z < DataConstants.CHUNK_MAX_BLOCKS) {
+        if(x < 64 && y < 64 && z < 64) {
+            y *= 64;
+            z *= 4096;
             chunkBuffer.seek(x + y + z);
             if(chunkBuffer.read().getWorldId() == 1) {
                 chunkBuffer.write(primaryMaterial);

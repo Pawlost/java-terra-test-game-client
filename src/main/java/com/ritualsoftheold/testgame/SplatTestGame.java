@@ -92,7 +92,7 @@ public class SplatTestGame extends SimpleApplication implements ActionListener {
         picker = new Picker(chunkLoader, world,  reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
         world.setLoadListener(listener);
-        LoadMarker player = world.createLoadMarker(0, 0, 0, 128, 128, 0);
+        LoadMarker player = world.createLoadMarker(0, 0, 0, 250, 250, 0);
         world.addLoadMarker(player);
         world.updateLoadMarkers();
     }

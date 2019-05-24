@@ -82,7 +82,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
         picker = new Picker(chunkLoader, world,  reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
         world.setLoadListener(listener);
-        LoadMarker player = world.createLoadMarker(0, 0, 0, 1, 1, 0);
+        LoadMarker player = world.createLoadMarker(0, 0, 0, 250, 250, 0);
         world.addLoadMarker(player);
         world.updateLoadMarkers();
     }
