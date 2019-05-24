@@ -84,7 +84,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
         picker = new Picker(chunkLoader, world,  reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
         world.setLoadListener(listener);
-        LoadMarker player = world.createLoadMarker(0, 0, 0, 1000, 1000, 0);
+        LoadMarker player = world.createLoadMarker(0, 0, 0, 2, 2, 0);
         world.addLoadMarker(player);
         world.updateLoadMarkers();
     }
@@ -196,6 +196,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
             // DO NOT check collision with the root node, or else ALL collisions will hit the
             // skybox! Always make a separate node for objects you want to collide with.
             terrain.collideWith(ray, results);
+            System.out.println(results.size());
             // For each hit, we know distance, impact point, name of geometry.
             if(results.size() > 0) {
                 picker.prepare(results);
