@@ -18,7 +18,8 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
     @Override
     public void setup(MaterialRegistry reg, TerraModule mod) {
         this.reg = reg;
-        weltschmerz = new Weltschmerz(reg.getMaterial(mod, "grass").getWorldId(), reg.getMaterial(mod,"dirt").getWorldId());
+        weltschmerz = new Weltschmerz();
+        weltschmerz.setMaterialID(reg.getMaterial(mod, "grass").getWorldId(), reg.getMaterial(mod,"dirt").getWorldId());
         weltschmerz.setSector();
     }
 
