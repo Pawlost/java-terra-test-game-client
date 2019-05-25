@@ -64,7 +64,6 @@ public class InputHandler implements ActionListener {
             // DO NOT check collision with the root node, or else ALL collisions will hit the
             // skybox! Always make a separate node for objects you want to collide with.
             terrain.collideWith(ray, results);
-            System.out.println(results.size());
             // For each hit, we know distance, impact point, name of geometry.
             if(results.size() > 0) {
                 picker.prepare(results);

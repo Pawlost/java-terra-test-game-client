@@ -2,11 +2,9 @@ package com.ritualsoftheold.testgame;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
-import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial.CullHint;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
@@ -58,14 +56,13 @@ public class TestGame extends SimpleApplication {
     public void simpleInitApp() {
         //setDisplayFps(false);
         //setDisplayStatView(false);
-        setupMaterials();
-        setupWorld();
-        initCrossHairs();
 
         terrain = new Node("Terrain");
         rootNode.attachChild(terrain);
-        rootNode.addLight(new AmbientLight());
-        rootNode.setCullHint(CullHint.Never);
+
+        setupMaterials();
+        setupWorld();
+        initCrossHairs();
 
         OffheapLoadMarker player = world.createLoadMarker(0, 0, 0, 20, 20, 0);
 
@@ -140,14 +137,18 @@ public class TestGame extends SimpleApplication {
          //   Vector3f camLoc = cam.getLocation();
 
         }*/
-
         while (!geomCreateQueue.isEmpty()) {
-            Geometry geom = geomCreateQueue.poll();
-            if(terrain.getChild(geom.getName()) != null){
-                terrain.detachChild(terrain.getChild(geom.getName()));
-            }
+            Geometry geom;
+            try {
+                geom = geomCreateQueue.take();
+                if (terrain.getChild(geom.getName()) != null) {
+                    terrain.detachChild(terrain.getChild(geom.getName()));
+                }
 
-            terrain.attachChild(geom);
+                terrain.attachChild(geom);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

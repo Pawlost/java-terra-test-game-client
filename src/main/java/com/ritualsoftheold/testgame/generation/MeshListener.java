@@ -1,7 +1,6 @@
 package com.ritualsoftheold.testgame.generation;
 
 import com.jme3.material.Material;
-import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
@@ -11,6 +10,7 @@ import com.ritualsoftheold.terra.offheap.node.OffheapChunk;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 
 import java.util.concurrent.BlockingQueue;
+
 
 public class MeshListener implements WorldLoadListener {
     private Material mat;
@@ -29,8 +29,6 @@ public class MeshListener implements WorldLoadListener {
     @Override
     public void chunkLoaded(OffheapChunk chunk, float x, float y, float z, LoadMarker trigger) {
 
-        long start = System.currentTimeMillis();
-
         Mesh mesh = JMEMesherWrapper.createMesh(chunk.getBuffer());
 
         mesh.updateBound();
@@ -42,13 +40,10 @@ public class MeshListener implements WorldLoadListener {
         geom.setMaterial(mat);
 
         //Set chunk position in world
-        geom.setShadowMode(RenderQueue.ShadowMode.Cast);
         geom.setLocalTranslation(x, y, z);
         geom.setCullHint(Spatial.CullHint.Never);
 
         // Place geometry in queue for main thread
-        geomCreateQueue.add(geom);
-
-        System.out.println("Chunk created " + (System.currentTimeMillis() - start) + " ms");
+        geomCreateQueue.offer(geom);
     }
 }
