@@ -1,33 +1,22 @@
 package com.ritualsoftheold.testgame.generation;
 
 import com.jme3.material.Material;
-import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.VertexBuffer;
-import com.jme3.util.BufferUtils;
 import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
-import com.ritualsoftheold.terra.mesher.GreedyMesher;
 import com.ritualsoftheold.terra.mesher.JMEMesherWrapper;
-import com.ritualsoftheold.terra.mesher.VoxelMesher;
-import com.ritualsoftheold.terra.mesher.resource.MeshContainer;
-import com.ritualsoftheold.terra.mesher.resource.TextureManager;
 import com.ritualsoftheold.terra.offheap.node.OffheapChunk;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 
 import java.util.concurrent.BlockingQueue;
 
 public class MeshListener implements WorldLoadListener {
-    private VoxelMesher mesher;
-    private TextureManager texManager;
     private Material mat;
     private BlockingQueue<Geometry> geomCreateQueue;
 
-    public MeshListener(TextureManager texManager, Material mat, BlockingQueue<Geometry> geomCreateQueue) {
-        mesher = new GreedyMesher();
-        this.texManager = texManager;
+    public MeshListener(Material mat, BlockingQueue<Geometry> geomCreateQueue) {
         this.mat = mat;
         this.geomCreateQueue = geomCreateQueue;
     }
@@ -39,6 +28,8 @@ public class MeshListener implements WorldLoadListener {
 
     @Override
     public void chunkLoaded(OffheapChunk chunk, float x, float y, float z, LoadMarker trigger) {
+
+        long start = System.currentTimeMillis();
 
         Mesh mesh = JMEMesherWrapper.createMesh(chunk.getBuffer());
 
@@ -57,5 +48,7 @@ public class MeshListener implements WorldLoadListener {
 
         // Place geometry in queue for main thread
         geomCreateQueue.add(geom);
+
+        System.out.println("Chunk created " + (System.currentTimeMillis() - start) + " ms");
     }
 }

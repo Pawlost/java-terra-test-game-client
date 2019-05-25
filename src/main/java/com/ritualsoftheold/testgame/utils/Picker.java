@@ -4,18 +4,15 @@ import com.jme3.collision.CollisionResults;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.ritualsoftheold.terra.core.material.TerraMaterial;
-import com.ritualsoftheold.terra.offheap.DataConstants;
 import com.ritualsoftheold.terra.offheap.data.BufferWithFormat;
 import com.ritualsoftheold.terra.offheap.io.ChunkLoader;
 import com.ritualsoftheold.terra.offheap.node.OffheapChunk;
 import com.ritualsoftheold.terra.offheap.world.OffheapLoadMarker;
-import com.ritualsoftheold.terra.offheap.world.OffheapWorld;
 
 public class Picker {
     private ChunkLoader chunkLoader;
-    private OffheapWorld world;
     private OffheapChunk chunk;
-    private OffheapLoadMarker loadMarker;
+    private OffheapLoadMarker player;
     private Vector3f collision;
     private Vector3f normals;
     private TerraMaterial primaryMaterial;
@@ -24,9 +21,9 @@ public class Picker {
     private float y;
     private float z;
 
-    public Picker (ChunkLoader loader, OffheapWorld world, TerraMaterial primaryMaterial, TerraMaterial emptyMaterial){
+    public Picker (ChunkLoader loader, OffheapLoadMarker player, TerraMaterial primaryMaterial, TerraMaterial emptyMaterial){
         chunkLoader = loader;
-        this.world = world;
+        this.player = player;
         this.primaryMaterial = primaryMaterial;
         this.emptyMaterial = emptyMaterial;
     }
@@ -36,8 +33,7 @@ public class Picker {
         x = chunkMesh.getWorldMatrix().m03;
         y = chunkMesh.getWorldMatrix().m13;
         z = chunkMesh.getWorldMatrix().m23;
-        loadMarker = world.getLoadMarker(x, y, z);
-        chunk = chunkLoader.getChunk(x, y, z, loadMarker);
+        chunk = chunkLoader.getChunk(x, y, z, player);
         collision = results.getClosestCollision().getContactPoint();
         normals = results.getClosestCollision().getContactNormal();
     }
@@ -65,7 +61,7 @@ public class Picker {
         BufferWithFormat chunkBuffer = chunk.getBuffer();
         chunkBuffer.seek(x + y + z);
         chunkBuffer.write(emptyMaterial);
-        chunkLoader.loadChunk(this.x, this.y, this.z, chunk, loadMarker);
+        chunkLoader.loadChunk(this.x, this.y, this.z, chunk, player);
     }
 
     public void place() {
@@ -92,7 +88,7 @@ public class Picker {
             chunkBuffer.seek(x + y + z);
             if(chunkBuffer.read().getWorldId() == 1) {
                 chunkBuffer.write(primaryMaterial);
-                chunkLoader.loadChunk(this.x, this.y, this.z, chunk, loadMarker);
+                chunkLoader.loadChunk(this.x, this.y, this.z, chunk, player);
             }
         }
     }
