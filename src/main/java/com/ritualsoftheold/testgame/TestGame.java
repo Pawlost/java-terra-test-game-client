@@ -67,7 +67,7 @@ public class TestGame extends SimpleApplication {
         initCrossHairs();
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 5, 5, 0);
+                cam.getLocation().z, 10, 10, 0);
 
         Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
@@ -145,13 +145,25 @@ public class TestGame extends SimpleApplication {
         int playerX = (int)(player.getX()/16f);
         int camZ = (int)(cam.getLocation().z/16f);
         int playerZ = (int)(player.getZ()/16f);
-
-        if (camX != playerX || camZ !=  playerZ) {
+        
+        if (camX != playerX || camZ != playerZ) {
             new Thread(() -> {
                 player.move(camX * 16, (int) cam.getLocation().y, camZ * 16);
-                world.updateLoadMarkers();
+                try {
+                    world.updateLoadMarkers();
+                    Thread.currentThread().join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }).start();
         }
+/*
+        if (camX != playerX || camZ != playerZ) {
+            player.move(camX * 16, (int) cam.getLocation().y, camZ * 16);
+            world.updateLoadMarkers();
+        }
+*/
+
 
         while (!geomDeleteQueue.isEmpty()) {
             String name = geomDeleteQueue.poll();
