@@ -64,7 +64,7 @@ public class TestGame extends SimpleApplication {
 
         setupMaterials();
         setupWorld();
-        initCrossHairs();
+        initUI();
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
                 cam.getLocation().z, 5, 5, 0);
@@ -134,24 +134,22 @@ public class TestGame extends SimpleApplication {
 
     @Override
     public void simpleUpdate(float tpf) {
-       /* loadMarkersUpdated += tpf;
-        if (loadMarkersUpdated > 1) {
-            loadMarkersUpdated = 0;
-         //   Vector3f camLoc = cam.getLocation();
+            int camX = (int) (cam.getLocation().x / 16f);
+            int playerX = (int) (player.getX() / 16f);
+            int camZ = (int) (cam.getLocation().z / 16f);
+            int playerZ = (int) (player.getZ() / 16f);
 
-        }*/
-
-       int camX = (int)(cam.getLocation().x/16f);
-        int playerX = (int)(player.getX()/16f);
-        int camZ = (int)(cam.getLocation().z/16f);
-        int playerZ = (int)(player.getZ()/16f);
-
-        if (camX != playerX || camZ !=  playerZ) {
-            new Thread(() -> {
+            if (camX != playerX || camZ != playerZ) {
                 player.move(camX * 16, (int) cam.getLocation().y, camZ * 16);
-                world.updateLoadMarkers();
-            }).start();
-        }
+                new Thread(() -> {
+                    try {
+                        world.updateLoadMarkers();
+                        Thread.currentThread().join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+            }
 
         while (!geomDeleteQueue.isEmpty()) {
             String name = geomDeleteQueue.poll();
@@ -171,7 +169,7 @@ public class TestGame extends SimpleApplication {
     /**
      * A centred plus sign to help the player aim.
      */
-    private void initCrossHairs() {
+    private void initUI() {
         guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
         BitmapText ch = new BitmapText(guiFont, false);
         ch.setSize(guiFont.getCharSet().getRenderedSize() * 2);
@@ -179,6 +177,12 @@ public class TestGame extends SimpleApplication {
         ch.setLocalTranslation( // center
                 settings.getWidth() / 2f - ch.getLineWidth() / 2,
                 settings.getHeight() / 2f + ch.getLineHeight() / 2, 0);
+        guiNode.attachChild(ch);
+
+        ch = new BitmapText(guiFont, false);
+        ch.setSize(guiFont.getCharSet().getRenderedSize() * 2);
+        ch.setText("Sector:"); // crosshairs
+        ch.setLocalTranslation(100, 100, 0);
         guiNode.attachChild(ch);
     }
 }

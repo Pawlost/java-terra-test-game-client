@@ -36,9 +36,9 @@ public class Picker {
     }
 
     public void pick() {
-        int x = (int) ((collision.x - chunk.getX())/0.25);
-        int y = (int) ((collision.y - chunk.getY())/0.25);
-        int z = (int) ((collision.z - chunk.getZ())/0.25);
+        int x = (int) ((collision.x - Math.abs(chunk.getX()))/0.25);
+        int y = (int) ((collision.y - Math.abs(chunk.getY()))/0.25);
+        int z = (int) ((collision.z - Math.abs(chunk.getZ()))/0.25);
 
         if(normals.x > 0){
             x--;
@@ -62,9 +62,9 @@ public class Picker {
     }
 
     public void place() {
-        int x = (int) ((collision.x - chunk.getX())/0.25);
-        int y = (int) ((collision.y - chunk.getY())/0.25);
-        int z = (int) ((collision.z - chunk.getZ())/0.25);
+        int x = (int) ((collision.x - Math.abs(chunk.getX()))/0.25);
+        int y = (int) ((collision.y - Math.abs(chunk.getY()))/0.25);
+        int z = (int) ((collision.z - Math.abs(chunk.getZ()))/0.25);
 
         if (normals.x < 0){
             x--;
@@ -91,9 +91,9 @@ public class Picker {
     }
 
     public void changeMaterial(){
-        int x = (int) ((collision.x - chunk.getX())/0.25);
-        int y = (int) ((collision.y - chunk.getY())/0.25);
-        int z = (int) ((collision.z - chunk.getZ())/0.25);
+        int x = (int) ((collision.x - Math.abs(chunk.getX()))/0.25);
+        int y = (int) ((collision.y - Math.abs(chunk.getY()))/0.25);
+        int z = (int) ((collision.z - Math.abs(chunk.getZ()))/0.25);
 
         if(normals.x > 0){
             x--;
