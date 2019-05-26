@@ -32,6 +32,7 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
     public void generate(GenerationTask task, GeneratorControl control, Void nothing) {
         BlockBuffer buf = control.getBuffer();
         weltschmerz.setChunk((int)task.getX(), (int)task.getZ());
+        task.setY((float) weltschmerz.getY());
         for (int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++) {
             int x = i % 64;
             int z = i / 4096;

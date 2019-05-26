@@ -17,9 +17,6 @@ public class Picker {
     private Vector3f normals;
     private TerraMaterial primaryMaterial;
     private TerraMaterial emptyMaterial;
-    private float x;
-    private float y;
-    private float z;
 
     public Picker (ChunkLoader loader, OffheapLoadMarker player, TerraMaterial primaryMaterial, TerraMaterial emptyMaterial){
         chunkLoader = loader;
@@ -30,9 +27,9 @@ public class Picker {
 
     public void prepare(CollisionResults results) {
         Geometry chunkMesh = results.getClosestCollision().getGeometry();
-        x = chunkMesh.getWorldMatrix().m03;
-        y = chunkMesh.getWorldMatrix().m13;
-        z = chunkMesh.getWorldMatrix().m23;
+        float x = chunkMesh.getWorldMatrix().m03;
+        float y = chunkMesh.getWorldMatrix().m13;
+        float z = chunkMesh.getWorldMatrix().m23;
         chunk = chunkLoader.getChunk(x, y, z, player);
         collision = results.getClosestCollision().getContactPoint();
         normals = results.getClosestCollision().getContactNormal();
@@ -61,7 +58,7 @@ public class Picker {
         BufferWithFormat chunkBuffer = chunk.getBuffer();
         chunkBuffer.seek(x + y + z);
         chunkBuffer.write(emptyMaterial);
-        chunkLoader.loadChunk(this.x, this.y, this.z, chunk, player);
+        chunkLoader.loadChunk(chunk);
     }
 
     public void place() {
@@ -88,7 +85,7 @@ public class Picker {
             chunkBuffer.seek(x + y + z);
             if(chunkBuffer.read().getWorldId() == 1) {
                 chunkBuffer.write(primaryMaterial);
-                chunkLoader.loadChunk(this.x, this.y, this.z, chunk, player);
+                chunkLoader.loadChunk(chunk);
             }
         }
     }

@@ -39,8 +39,10 @@ public class TestGame extends SimpleApplication {
     private MaterialRegistry reg;
     private Node terrain;
     private TerraModule mod;
+    private OffheapLoadMarker player;
 
     private BlockingQueue<Geometry> geomCreateQueue = new ArrayBlockingQueue<>(10000);
+    private BlockingQueue<String> geomDeleteQueue = new ArrayBlockingQueue<>(10000);
 
     public static void main(String... args) {
         TestGame app = new TestGame();
@@ -64,7 +66,8 @@ public class TestGame extends SimpleApplication {
         setupWorld();
         initCrossHairs();
 
-        OffheapLoadMarker player = world.createLoadMarker(0, 0, 0, 20, 20, 0);
+        player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
+                cam.getLocation().z, 5, 5, 0);
 
         Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
@@ -75,11 +78,11 @@ public class TestGame extends SimpleApplication {
 
         world.setLoadListener(listener);
         world.addLoadMarker(player);
-        world.updateLoadMarkers();
+        world.initialChunkGeneration();
     }
 
-    private void setupWorld(){
-        listener = new MeshListener(mat, geomCreateQueue);
+    private void setupWorld() {
+        listener = new MeshListener(mat, geomCreateQueue, geomDeleteQueue);
         WorldGeneratorInterface<?> gen = new WeltschmerzWorldGenerator();
         chunkLoader = new ChunkLoader(listener);
         gen.setup(reg, mod);
@@ -111,7 +114,7 @@ public class TestGame extends SimpleApplication {
                 }).build();
     }
 
-    private void setupMaterials(){
+    private void setupMaterials() {
         mod = new TerraModule("testgame");
         mod.newMaterial().name("dirt").texture(new TerraTexture("NorthenForestDirt256px.png"));
         mod.newMaterial().name("grass").texture(new TerraTexture("NorthenForestGrass256px.png"));
@@ -137,30 +140,45 @@ public class TestGame extends SimpleApplication {
          //   Vector3f camLoc = cam.getLocation();
 
         }*/
-        while (!geomCreateQueue.isEmpty()) {
-            Geometry geom;
-            try {
-                geom = geomCreateQueue.take();
-                if (terrain.getChild(geom.getName()) != null) {
-                    terrain.detachChild(terrain.getChild(geom.getName()));
-                }
 
-                terrain.attachChild(geom);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+       int camX = (int)(cam.getLocation().x/16f);
+        int playerX = (int)(player.getX()/16f);
+        int camZ = (int)(cam.getLocation().z/16f);
+        int playerZ = (int)(player.getZ()/16f);
+
+        if (camX != playerX || camZ !=  playerZ) {
+            new Thread(() -> {
+                player.move(camX * 16, (int) cam.getLocation().y, camZ * 16);
+                world.updateLoadMarkers();
+            }).start();
+        }
+
+        while (!geomDeleteQueue.isEmpty()) {
+            String name = geomDeleteQueue.poll();
+            terrain.detachChildNamed(name);
+        }
+
+        while (!geomCreateQueue.isEmpty()) {
+            Geometry geom = geomCreateQueue.poll();
+            if (terrain.getChild(geom.getName()) != null) {
+                terrain.detachChildNamed(geom.getName());
             }
+
+            terrain.attachChild(geom);
         }
     }
 
-    /** A centred plus sign to help the player aim. */
+    /**
+     * A centred plus sign to help the player aim.
+     */
     private void initCrossHairs() {
         guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
         BitmapText ch = new BitmapText(guiFont, false);
         ch.setSize(guiFont.getCharSet().getRenderedSize() * 2);
         ch.setText("+"); // crosshairs
         ch.setLocalTranslation( // center
-                settings.getWidth() / 2f - ch.getLineWidth()/2,
-                settings.getHeight() / 2f + ch.getLineHeight()/2, 0);
+                settings.getWidth() / 2f - ch.getLineWidth() / 2,
+                settings.getHeight() / 2f + ch.getLineHeight() / 2, 0);
         guiNode.attachChild(ch);
     }
 }
