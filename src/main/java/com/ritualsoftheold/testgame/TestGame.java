@@ -34,6 +34,8 @@ public class TestGame extends SimpleApplication {
     private OffheapWorld world;
     private Material mat;
     //private int loadMarkersUpdated;
+    private BitmapText playerPosition;
+    private BitmapText sector;
     private WorldLoadListener listener;
     private ChunkLoader chunkLoader;
     private MaterialRegistry reg;
@@ -67,12 +69,12 @@ public class TestGame extends SimpleApplication {
         initUI();
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 10, 10, 0);
+                cam.getLocation().z, 5, 5, 0);
 
         Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
         // Some config options
-        flyCam.setMoveSpeed(10);
+        flyCam.setMoveSpeed(40);
 
         new InputHandler(inputManager, picker, terrain, mat, cam);
 
@@ -134,21 +136,30 @@ public class TestGame extends SimpleApplication {
 
     @Override
     public void simpleUpdate(float tpf) {
-            int camX = (int) (cam.getLocation().x / 16f);
-            int playerX = (int) (player.getX() / 16f);
-            int camZ = (int) (cam.getLocation().z / 16f);
-            int playerZ = (int) (player.getZ() / 16f);
-            
-        if (camX != playerX || camZ != playerZ) {
-            new Thread(() -> {
-                player.move(camX * 16, (int) cam.getLocation().y, camZ * 16);
-                try {
-                    world.updateLoadMarkers();
-                    Thread.currentThread().join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
+
+        playerPosition.setText("Player position x: " + cam.getLocation().x + " y: " +
+                cam.getLocation().y + " z: " + cam.getLocation().z);
+        int camX = (int) (cam.getLocation().x / 16f)*16;
+        int playerX = (int) (player.getX() / 16f)*16;
+        int camZ = (int) (cam.getLocation().z / 16f)*16;
+        int playerZ = (int) (player.getZ() / 16f)*16;
+
+        if (camX != playerX && !player.hasMoved() || camZ != playerZ && !player.hasMoved()) {
+
+            if(camX > playerX){
+                playerX += 16;
+            }else if(camX < playerX){
+                playerX -= 16;
+            }
+
+            if(camZ > playerZ){
+                playerZ += 16;
+            }else if(camZ < playerZ){
+                playerZ -= 16;
+            }
+
+            player.move(playerX, (int) cam.getLocation().y, playerZ);
+            world.updateLoadMarker(player, false);
         }
 
         while (!geomDeleteQueue.isEmpty()) {
@@ -179,10 +190,15 @@ public class TestGame extends SimpleApplication {
                 settings.getHeight() / 2f + ch.getLineHeight() / 2, 0);
         guiNode.attachChild(ch);
 
-        ch = new BitmapText(guiFont, false);
-        ch.setSize(guiFont.getCharSet().getRenderedSize() * 2);
-        ch.setText("Sector:"); // crosshairs
-        ch.setLocalTranslation(100, 100, 0);
-        guiNode.attachChild(ch);
+        sector = new BitmapText(guiFont, false);
+        sector.setSize(guiFont.getCharSet().getRenderedSize() * 2);
+        sector.setText("Sector:");
+        sector.setLocalTranslation(0, 700, 0);
+        guiNode.attachChild(sector);
+
+        playerPosition = new BitmapText(guiFont, false);
+        playerPosition.setSize(guiFont.getCharSet().getRenderedSize() * 2);
+        playerPosition.setLocalTranslation(0, 800, 0);
+        guiNode.attachChild(playerPosition);
     }
 }
