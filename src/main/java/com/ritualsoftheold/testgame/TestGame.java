@@ -158,9 +158,7 @@ public class TestGame extends SimpleApplication {
                 }
 
                 player.move(playerX, (int) cam.getLocation().y, playerZ);
-                new Thread(() -> {
-                    world.updateLoadMarker(player, false);
-                }).start();
+                new Thread(() -> {world.updateLoadMarker(player, false); }).start();
             }
         }
 

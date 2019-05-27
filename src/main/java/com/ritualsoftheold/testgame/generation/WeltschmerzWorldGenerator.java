@@ -16,6 +16,8 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
     private Weltschmerz weltschmerz;
     private MaterialRegistry reg;
     private BitmapText text;
+    private int sectorX = 0;
+    private int sectorZ = 0;
 
     public WorldGeneratorInterface<Void> setup(MaterialRegistry reg, TerraModule mod, BitmapText text) {
         this.text = text;
@@ -27,10 +29,10 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
     public void setup(MaterialRegistry reg, TerraModule mod) {
         this.reg = reg;
         weltschmerz = new Weltschmerz();
-        weltschmerz.changeSector();
-        text.setText("Sector, name: " + weltschmerz.getSectorName()+ ", position x: " +
-                weltschmerz.getPostionX() + " , z:" + weltschmerz.getPostionZ());
         weltschmerz.setMaterialID(reg.getMaterial(mod, "grass").getWorldId(), reg.getMaterial(mod,"dirt").getWorldId());
+        weltschmerz.changeSector(sectorX, sectorZ);
+        text.setText("Sector, name: " + weltschmerz.getSectorName()+ ", position x: " +
+                sectorX + " , z: " + sectorZ);
     }
 
     @Override
@@ -40,6 +42,19 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
     }
 
     public void generate(GenerationTask task, GeneratorControl control, Void nothing) {
+        int currentSectorPositionX = (int)(task.getX()/Weltschmerz.DEFAULT_MAX_SECTOR_X);
+        int currentSectorPositionZ = (int)(task.getZ()/Weltschmerz.DEFAULT_MAX_SECTOR_Z);
+
+
+        if(sectorX != currentSectorPositionX && currentSectorPositionX >= 0 || sectorZ != currentSectorPositionZ && currentSectorPositionZ >= 0){
+            sectorX = currentSectorPositionX;
+            sectorZ = currentSectorPositionZ;
+
+            weltschmerz.changeSector(sectorX, sectorZ);
+            text.setText("Sector, name: " + weltschmerz.getSectorName()+ ", position x: " +
+                    sectorX + " , z: " + sectorZ);
+        }
+
         BlockBuffer buf = control.getBuffer();
         weltschmerz.setChunk((int)task.getX(), (int)task.getZ());
         task.setY((float) weltschmerz.getY());
