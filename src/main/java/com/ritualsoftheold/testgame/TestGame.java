@@ -64,9 +64,9 @@ public class TestGame extends SimpleApplication {
         terrain = new Node("Terrain");
         rootNode.attachChild(terrain);
 
+        initUI();
         setupMaterials();
         setupWorld();
-        initUI();
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
                 cam.getLocation().z, 5, 5, 0);
@@ -79,15 +79,13 @@ public class TestGame extends SimpleApplication {
         new InputHandler(inputManager, picker, terrain, mat, cam);
 
         world.setLoadListener(listener);
-        world.addLoadMarker(player);
-        world.initialChunkGeneration();
+        new Thread(() -> world.initialChunkGeneration(player)).start();
     }
 
     private void setupWorld() {
         listener = new MeshListener(mat, geomCreateQueue, geomDeleteQueue);
-        WorldGeneratorInterface<?> gen = new WeltschmerzWorldGenerator();
+        WorldGeneratorInterface<?> gen = new WeltschmerzWorldGenerator().setup(reg, mod, sector);
         chunkLoader = new ChunkLoader(listener);
-        gen.setup(reg, mod);
 
         ChunkBuffer.Builder bufferBuilder = new ChunkBuffer.Builder()
                 .maxChunks(128)
@@ -159,12 +157,9 @@ public class TestGame extends SimpleApplication {
             }
 
             player.move(playerX, (int) cam.getLocation().y, playerZ);
-            world.updateLoadMarker(player, false);
-        }
-
-        while (!geomDeleteQueue.isEmpty()) {
-            String name = geomDeleteQueue.poll();
-            terrain.detachChildNamed(name);
+            new Thread(() -> {
+                world.updateLoadMarker(player, false);
+            }).start();
         }
 
         while (!geomCreateQueue.isEmpty()) {
@@ -174,6 +169,11 @@ public class TestGame extends SimpleApplication {
             }
 
             terrain.attachChild(geom);
+        }
+
+        while (!geomDeleteQueue.isEmpty()) {
+            String name = geomDeleteQueue.poll();
+            terrain.detachChildNamed(name);
         }
     }
 
@@ -192,7 +192,7 @@ public class TestGame extends SimpleApplication {
 
         sector = new BitmapText(guiFont, false);
         sector.setSize(guiFont.getCharSet().getRenderedSize() * 2);
-        sector.setText("Sector:");
+        sector.setText("Position:");
         sector.setLocalTranslation(0, 700, 0);
         guiNode.attachChild(sector);
 

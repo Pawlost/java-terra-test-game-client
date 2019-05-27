@@ -1,5 +1,6 @@
 package com.ritualsoftheold.testgame.generation;
 
+import com.jme3.font.BitmapText;
 import com.ritualsoftheold.terra.core.TerraModule;
 import com.ritualsoftheold.terra.core.buffer.BlockBuffer;
 import com.ritualsoftheold.terra.core.gen.interfaces.GeneratorControl;
@@ -14,13 +15,22 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
 
     private Weltschmerz weltschmerz;
     private MaterialRegistry reg;
+    private BitmapText text;
+
+    public WorldGeneratorInterface<Void> setup(MaterialRegistry reg, TerraModule mod, BitmapText text) {
+        this.text = text;
+        setup(reg, mod);
+        return this;
+    }
 
     @Override
     public void setup(MaterialRegistry reg, TerraModule mod) {
         this.reg = reg;
         weltschmerz = new Weltschmerz();
+        weltschmerz.changeSector();
+        text.setText("Sector, name: " + weltschmerz.getSectorName()+ ", position x: " +
+                weltschmerz.getPostionX() + " , z:" + weltschmerz.getPostionZ());
         weltschmerz.setMaterialID(reg.getMaterial(mod, "grass").getWorldId(), reg.getMaterial(mod,"dirt").getWorldId());
-        weltschmerz.setSector();
     }
 
     @Override
