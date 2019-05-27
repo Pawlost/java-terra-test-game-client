@@ -5,7 +5,6 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
 import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
-import com.ritualsoftheold.terra.mesher.JMEMesherWrapper;
 import com.ritualsoftheold.terra.offheap.node.OffheapChunk;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 

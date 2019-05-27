@@ -142,24 +142,26 @@ public class TestGame extends SimpleApplication {
         int camZ = (int) (cam.getLocation().z / 16f)*16;
         int playerZ = (int) (player.getZ() / 16f)*16;
 
-        if (camX != playerX && !player.hasMoved() || camZ != playerZ && !player.hasMoved()) {
+        if(geomCreateQueue.isEmpty() && !player.hasMoved() && geomDeleteQueue.isEmpty()) {
+            if (camX != playerX  || camZ != playerZ) {
 
-            if(camX > playerX){
-                playerX += 16;
-            }else if(camX < playerX){
-                playerX -= 16;
+                if (camX > playerX) {
+                    playerX += 16;
+                } else if (camX < playerX) {
+                    playerX -= 16;
+                }
+
+                if (camZ > playerZ) {
+                    playerZ += 16;
+                } else if (camZ < playerZ) {
+                    playerZ -= 16;
+                }
+
+                player.move(playerX, (int) cam.getLocation().y, playerZ);
+                new Thread(() -> {
+                    world.updateLoadMarker(player, false);
+                }).start();
             }
-
-            if(camZ > playerZ){
-                playerZ += 16;
-            }else if(camZ < playerZ){
-                playerZ -= 16;
-            }
-
-            player.move(playerX, (int) cam.getLocation().y, playerZ);
-            new Thread(() -> {
-                world.updateLoadMarker(player, false);
-            }).start();
         }
 
         while (!geomCreateQueue.isEmpty()) {
