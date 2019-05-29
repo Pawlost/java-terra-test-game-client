@@ -69,7 +69,7 @@ public class TestGame extends SimpleApplication {
         setupWorld();
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 5, 5, 0);
+                cam.getLocation().z, 7, 7, 0);
 
         Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 

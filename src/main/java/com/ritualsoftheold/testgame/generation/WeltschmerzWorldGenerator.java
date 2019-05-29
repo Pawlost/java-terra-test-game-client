@@ -10,6 +10,7 @@ import com.ritualsoftheold.terra.core.gen.tasks.Pipeline;
 import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.offheap.DataConstants;
 import com.ritualsoftheold.weltschmerz.core.Weltschmerz;
+import com.ritualsoftheold.weltschmerz.landmass.Constants;
 
 public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> {
 
@@ -42,11 +43,11 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
     }
 
     public void generate(GenerationTask task, GeneratorControl control, Void nothing) {
-        int currentSectorPositionX = (int)(task.getX()/Weltschmerz.DEFAULT_MAX_SECTOR_X);
-        int currentSectorPositionZ = (int)(task.getZ()/Weltschmerz.DEFAULT_MAX_SECTOR_Z);
+        int currentSectorPositionX = (int)(task.getX()/ Constants.DEFAULT_MAX_SECTOR_X);
+        int currentSectorPositionZ = (int)(task.getZ()/Constants.DEFAULT_MAX_SECTOR_Z);
 
 
-        if(sectorX != currentSectorPositionX && currentSectorPositionX >= 0 || sectorZ != currentSectorPositionZ && currentSectorPositionZ >= 0){
+        if(sectorX != currentSectorPositionX || sectorZ != currentSectorPositionZ){
             sectorX = currentSectorPositionX;
             sectorZ = currentSectorPositionZ;
 
