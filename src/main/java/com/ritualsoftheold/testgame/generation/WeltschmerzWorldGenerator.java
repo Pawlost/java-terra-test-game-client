@@ -17,8 +17,6 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
     private Weltschmerz weltschmerz;
     private MaterialRegistry reg;
     private BitmapText text;
-    private int sectorX = 0;
-    private int sectorZ = 0;
 
     public WorldGeneratorInterface<Void> setup(MaterialRegistry reg, TerraModule mod, BitmapText text) {
         this.text = text;
@@ -31,9 +29,9 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
         this.reg = reg;
         weltschmerz = new Weltschmerz();
         weltschmerz.setMaterialID(reg.getMaterial(mod, "grass").getWorldId(), reg.getMaterial(mod,"dirt").getWorldId());
-        weltschmerz.changeSector(sectorX, sectorZ);
+        weltschmerz.changeSector(0, 0);
         text.setText("Sector, name: " + weltschmerz.getSectorName()+ ", position x: " +
-                sectorX + " , z: " + sectorZ);
+                0 + " , z: " + 0);
     }
 
     @Override
@@ -47,18 +45,14 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
         int currentSectorPositionZ = (int)(task.getZ()/Constants.DEFAULT_MAX_SECTOR_Z);
 
 
-        if(sectorX != currentSectorPositionX || sectorZ != currentSectorPositionZ){
-            sectorX = currentSectorPositionX;
-            sectorZ = currentSectorPositionZ;
-
-            weltschmerz.changeSector(sectorX, sectorZ);
+        if(weltschmerz.getSectorPostionX() != currentSectorPositionX || weltschmerz.getSectorPostionZ() != currentSectorPositionZ){
+            weltschmerz.changeSector(currentSectorPositionX, currentSectorPositionZ);
             text.setText("Sector, name: " + weltschmerz.getSectorName()+ ", position x: " +
-                    sectorX + " , z: " + sectorZ);
+                    currentSectorPositionX + " , z: " + currentSectorPositionX);
         }
 
         BlockBuffer buf = control.getBuffer();
-        weltschmerz.setChunk((int)task.getX(), (int)task.getZ());
-        task.setY((float) weltschmerz.getY());
+        task.setY(weltschmerz.setChunk((int)task.getX(), (int)task.getZ()));
         for (int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++) {
             int x = i % 64;
             int z = i / 4096;
