@@ -48,7 +48,7 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
         if(weltschmerz.getSectorPostionX() != currentSectorPositionX || weltschmerz.getSectorPostionZ() != currentSectorPositionZ){
             weltschmerz.changeSector(currentSectorPositionX, currentSectorPositionZ);
             text.setText("Sector, name: " + weltschmerz.getSectorName()+ ", position x: " +
-                    currentSectorPositionX + " , z: " + currentSectorPositionX);
+                    currentSectorPositionX + " , z: " + currentSectorPositionZ);
         }
 
         BlockBuffer buf = control.getBuffer();

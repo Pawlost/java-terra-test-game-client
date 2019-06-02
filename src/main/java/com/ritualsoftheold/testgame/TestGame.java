@@ -24,6 +24,7 @@ import com.ritualsoftheold.testgame.utils.InputHandler;
 import com.ritualsoftheold.testgame.generation.MeshListener;
 import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
 import com.ritualsoftheold.testgame.utils.Picker;
+import com.ritualsoftheold.weltschmerz.landmass.Constants;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -36,6 +37,7 @@ public class TestGame extends SimpleApplication {
     //private int loadMarkersUpdated;
     private BitmapText playerPosition;
     private BitmapText sector;
+    private BitmapText translation;
     private WorldLoadListener listener;
     private ChunkLoader chunkLoader;
     private MaterialRegistry reg;
@@ -69,12 +71,12 @@ public class TestGame extends SimpleApplication {
         setupWorld();
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 7, 7, 0);
+                cam.getLocation().z, 9, 9, 0);
 
         Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
         // Some config options
-        flyCam.setMoveSpeed(40);
+        flyCam.setMoveSpeed(10);
 
         new InputHandler(inputManager, picker, terrain, mat, cam);
 
@@ -142,6 +144,8 @@ public class TestGame extends SimpleApplication {
         int camZ = (int) (cam.getLocation().z / 16f)*16;
         int playerZ = (int) (player.getZ() / 16f)*16;
 
+        translation.setText("position x: " + cam.getLocation().x/ Constants.DEFAULT_MAX_SECTOR_X + " , z: " +  cam.getLocation().z/ Constants.DEFAULT_MAX_SECTOR_Z);
+
         if(geomCreateQueue.isEmpty() && !player.hasMoved() && geomDeleteQueue.isEmpty()) {
             if (camX != playerX  || camZ != playerZ) {
 
@@ -200,5 +204,10 @@ public class TestGame extends SimpleApplication {
         playerPosition.setSize(guiFont.getCharSet().getRenderedSize() * 2);
         playerPosition.setLocalTranslation(0, 800, 0);
         guiNode.attachChild(playerPosition);
+
+        translation = new BitmapText(guiFont, false);
+        translation.setSize(guiFont.getCharSet().getRenderedSize() * 2);
+        translation.setLocalTranslation(0, 600, 0);
+        guiNode.attachChild(translation);
     }
 }
