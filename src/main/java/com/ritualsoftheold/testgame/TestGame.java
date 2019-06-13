@@ -73,12 +73,12 @@ public class TestGame extends SimpleApplication {
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
                 cam.getLocation().z, 9, 9, 0);
 
-        Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
+        //Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
         // Some config options
-        flyCam.setMoveSpeed(10);
+        flyCam.setMoveSpeed(100);
 
-        new InputHandler(inputManager, picker, terrain, mat, cam);
+        new InputHandler(inputManager, null, terrain, mat, cam);
 
         world.setLoadListener(listener);
         new Thread(() -> world.initialChunkGeneration(player)).start();
