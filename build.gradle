@@ -33,6 +33,7 @@ project(':Terra:terra-offheap') {
     }
 }
 
+
 project(':Terra:terra-meshgen') {
     dependencies {
         compile project(':Terra:terra-offheap')
@@ -49,9 +50,16 @@ project(':Terra:terra-core') {
     }
 }
 
+project(':Weltschmerz:weltschmerz-noise') {
+    dependencies {
+        compile project(':Weltschmerz:weltschmerz-geometry')
+    }
+}
+
 project(':Weltschmerz:weltschmerz-landmass') {
     dependencies {
         compile project(':Weltschmerz:weltschmerz-noise')
+        compile project(':Weltschmerz:weltschmerz-geometry')
     }
 }
 
@@ -59,6 +67,7 @@ project(':Weltschmerz:weltschmerz-core') {
     dependencies {
         compile project(':Weltschmerz:weltschmerz-noise')
         compile project(':Weltschmerz:weltschmerz-landmass')
+        compile project(':Weltschmerz:weltschmerz-geometry')
     }
 }
 
@@ -67,6 +76,7 @@ project(':Weltschmerz:heightmap-generator') {
         compile project(':Weltschmerz:weltschmerz-core')
         compile project(':Weltschmerz:weltschmerz-noise')
         compile project(':Weltschmerz:weltschmerz-landmass')
+        compile project(':Weltschmerz:weltschmerz-geometry')
     }
 }
 

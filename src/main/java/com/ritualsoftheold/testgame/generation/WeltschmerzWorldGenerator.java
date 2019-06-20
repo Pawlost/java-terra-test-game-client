@@ -10,7 +10,6 @@ import com.ritualsoftheold.terra.core.gen.tasks.Pipeline;
 import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.offheap.DataConstants;
 import com.ritualsoftheold.weltschmerz.core.Weltschmerz;
-import com.ritualsoftheold.weltschmerz.landmass.Constants;
 
 public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> {
 
@@ -29,9 +28,6 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
         this.reg = reg;
         weltschmerz = new Weltschmerz();
         weltschmerz.setMaterialID(reg.getMaterial(mod, "grass").getWorldId(), reg.getMaterial(mod,"dirt").getWorldId());
-        weltschmerz.changeSector(0, 0);
-        text.setText("Sector, name: " + weltschmerz.getSectorName()+ ", position x: " +
-                0 + " , z: " + 0);
     }
 
     @Override
@@ -41,18 +37,10 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
     }
 
     public void generate(GenerationTask task, GeneratorControl control, Void nothing) {
-        int currentSectorPositionX = (int)(task.getX()/ Constants.DEFAULT_MAX_SECTOR_X);
-        int currentSectorPositionZ = (int)(task.getZ()/Constants.DEFAULT_MAX_SECTOR_Z);
-
-
-        if(weltschmerz.getSectorPostionX() != currentSectorPositionX || weltschmerz.getSectorPostionZ() != currentSectorPositionZ){
-            weltschmerz.changeSector(currentSectorPositionX, currentSectorPositionZ);
-            text.setText("Sector, name: " + weltschmerz.getSectorName()+ ", position x: " +
-                    currentSectorPositionX + " , z: " + currentSectorPositionZ);
-        }
-
         BlockBuffer buf = control.getBuffer();
-        task.setY(weltschmerz.setChunk((int)task.getX(), (int)task.getZ()));
+        float posY = (float) weltschmerz.setChunk((int)task.getX(), (int)task.getZ());
+        task.setY(posY);
+        text.setText("Sector, name: " + weltschmerz.getSectorName() + " height: " + posY);
         for (int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++) {
             int x = i % 64;
             int z = i / 4096;

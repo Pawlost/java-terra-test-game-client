@@ -83,8 +83,8 @@ public class InputHandler implements ActionListener {
             terrain.collideWith(ray, results);
             // For each hit, we know distance, impact point, name of geometry.
             if(results.size() > 0) {
-                picker.prepare(results);
-                picker.place();
+//                picker.prepare(results);
+  //              picker.place();
             }
         }
 
