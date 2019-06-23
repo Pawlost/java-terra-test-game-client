@@ -23,6 +23,7 @@ import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 import com.ritualsoftheold.testgame.utils.InputHandler;
 import com.ritualsoftheold.testgame.generation.MeshListener;
 import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
+import com.ritualsoftheold.weltschmerz.noise.generators.WorldNoise;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -108,7 +109,7 @@ public class TestGame extends SimpleApplication {
                     public PanicResult goalNotMet(long goal, long possible) {
                         return PanicResult.CONTINUE;
                     }
-                }).build();
+                }).build(WorldNoise.MAX_SECTOR_HEIGHT_DIFFERENCE);
     }
 
     private void setupMaterials() {
@@ -146,12 +147,6 @@ public class TestGame extends SimpleApplication {
                     playerX += 16;
                 } else if (camX < playerX) {
                     playerX -= 16;
-                }
-
-                if (camZ > playerZ) {
-                    playerZ += 16;
-                } else if (camZ < playerZ) {
-                    playerZ -= 16;
                 }
 
                 if (camZ > playerZ) {
