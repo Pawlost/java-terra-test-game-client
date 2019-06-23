@@ -1,6 +1,5 @@
 package com.ritualsoftheold.testgame.generation;
 
-import com.jme3.font.BitmapText;
 import com.ritualsoftheold.terra.core.TerraModule;
 import com.ritualsoftheold.terra.core.buffer.BlockBuffer;
 import com.ritualsoftheold.terra.core.gen.interfaces.GeneratorControl;
@@ -15,19 +14,13 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
 
     private Weltschmerz weltschmerz;
     private MaterialRegistry reg;
-    private BitmapText text;
-
-    public WorldGeneratorInterface<Void> setup(MaterialRegistry reg, TerraModule mod, BitmapText text) {
-        this.text = text;
-        setup(reg, mod);
-        return this;
-    }
 
     @Override
-    public void setup(MaterialRegistry reg, TerraModule mod) {
+    public  WorldGeneratorInterface<?> setup(MaterialRegistry reg, TerraModule mod) {
         this.reg = reg;
         weltschmerz = new Weltschmerz();
         weltschmerz.setMaterialID(reg.getMaterial(mod, "grass").getWorldId(), reg.getMaterial(mod,"dirt").getWorldId());
+        return this;
     }
 
     @Override
@@ -36,11 +29,9 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
         return null;
     }
 
-    public void generate(GenerationTask task, GeneratorControl control, Void nothing) {
+    private void generate(GenerationTask task, GeneratorControl control, Void nothing) {
         BlockBuffer buf = control.getBuffer();
-        float posY = (float) weltschmerz.setChunk((int)task.getX(), (int)task.getZ());
-        task.setY(posY);
-        text.setText("Sector, name: " + weltschmerz.getSectorName() + " height: " + posY);
+        weltschmerz.setChunk((int)task.getX(), (int)task.getY (), (int)task.getZ());
         for (int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++) {
             int x = i % 64;
             int z = i / 4096;

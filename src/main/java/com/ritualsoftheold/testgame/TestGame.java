@@ -33,7 +33,6 @@ public class TestGame extends SimpleApplication {
     private OffheapWorld world;
     private Material mat;
     private BitmapText playerPosition;
-    private BitmapText sector;
     private WorldLoadListener listener;
     private ChunkLoader chunkLoader;
     private MaterialRegistry reg;
@@ -67,12 +66,12 @@ public class TestGame extends SimpleApplication {
         setupWorld();
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 15, 15, 0);
+                cam.getLocation().z, 4, 4, 0);
 
         //Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
         // Some config options
-        flyCam.setMoveSpeed(100);
+        flyCam.setMoveSpeed(40);
 
         new InputHandler(inputManager, null, terrain, mat, cam);
 
@@ -82,7 +81,7 @@ public class TestGame extends SimpleApplication {
 
     private void setupWorld() {
         listener = new MeshListener(mat, geomCreateQueue, geomDeleteQueue);
-        WorldGeneratorInterface<?> gen = new WeltschmerzWorldGenerator().setup(reg, mod, sector);
+        WorldGeneratorInterface<?> gen = new WeltschmerzWorldGenerator().setup(reg, mod);
         chunkLoader = new ChunkLoader(listener);
 
         ChunkBuffer.Builder bufferBuilder = new ChunkBuffer.Builder()
@@ -155,6 +154,12 @@ public class TestGame extends SimpleApplication {
                     playerZ -= 16;
                 }
 
+                if (camZ > playerZ) {
+                    playerZ += 16;
+                } else if (camZ < playerZ) {
+                    playerZ -= 16;
+                }
+
                 player.move(playerX, (int) cam.getLocation().y, playerZ);
                 new Thread(() -> {world.updateLoadMarker(player, false); }).start();
             }
@@ -187,12 +192,6 @@ public class TestGame extends SimpleApplication {
                 settings.getWidth() / 2f - ch.getLineWidth() / 2,
                 settings.getHeight() / 2f + ch.getLineHeight() / 2, 0);
         guiNode.attachChild(ch);
-
-        sector = new BitmapText(guiFont, false);
-        sector.setSize(guiFont.getCharSet().getRenderedSize() * 2);
-        sector.setText("Polygon:");
-        sector.setLocalTranslation(0, 700, 0);
-        guiNode.attachChild(sector);
 
         playerPosition = new BitmapText(guiFont, false);
         playerPosition.setSize(guiFont.getCharSet().getRenderedSize() * 2);

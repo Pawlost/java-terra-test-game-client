@@ -15,8 +15,9 @@ public class TestWorldGenerator implements WorldGeneratorInterface<Void> {
     private MaterialRegistry reg;
 
     @Override
-    public void setup(MaterialRegistry reg, TerraModule mod) {
+    public  WorldGeneratorInterface<?> setup(MaterialRegistry reg, TerraModule mod) {
         this.reg = reg;
+        return this;
     }
 
     @Override

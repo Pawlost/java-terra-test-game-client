@@ -29,7 +29,7 @@ public class Picker {
         Geometry chunkMesh = results.getClosestCollision().getGeometry();
         float x = chunkMesh.getWorldMatrix().m03;
         float z = chunkMesh.getWorldMatrix().m23;
-        chunk = chunkLoader.getChunk(x, z, player);
+    //    chunk = chunkLoader.getChunk(x, z, player);
         collision = results.getClosestCollision().getContactPoint();
         normals = results.getClosestCollision().getContactNormal();
     }
