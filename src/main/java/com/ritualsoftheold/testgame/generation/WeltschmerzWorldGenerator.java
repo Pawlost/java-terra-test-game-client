@@ -30,14 +30,6 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface<Void> 
     }
 
     private void generate(GenerationTask task, GeneratorControl control, Void nothing) {
-        BlockBuffer buf = control.getBuffer();
-        weltschmerz.setChunk((int)task.getX(), (int)task.getY (), (int)task.getZ());
-        for (int i = 0; i < DataConstants.CHUNK_MAX_BLOCKS; i++) {
-            int x = i % 64;
-            int z = i / 4096;
-            int y = (i - 4096 * z) / 64;
-            buf.write(reg.getForWorldId(weltschmerz.generateVoxel(x, y, z)));
-            buf.next();
-        }
+        weltschmerz.getChunk((int)task.getX(), (int)task.getY(), (int)task.getZ(), control.getLArray());
     }
 }

@@ -3,9 +3,10 @@ package com.ritualsoftheold.testgame.generation;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
-import com.ritualsoftheold.terra.core.buffer.BlockBuffer;
+import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.mesher.Face;
 import com.ritualsoftheold.terra.mesher.GreedyMesher;
+import xerial.larray.LByteArray;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -15,13 +16,12 @@ import java.util.HashMap;
 public class JMEMesherWrapper {
 
     //Moving all values to MeshContainer
-    public static Mesh createMesh(BlockBuffer buf) {
+    public static Mesh createMesh(LByteArray array, MaterialRegistry reg) {
 
-        GreedyMesher greedyMesher = new GreedyMesher();
+        GreedyMesher greedyMesher = new GreedyMesher(reg);
         int verticeIndex = 0;
-        HashMap<Integer, HashMap<Integer, Face>> sector = greedyMesher.chunk(buf);
+        HashMap<Integer, HashMap<Integer, Face>> sector = greedyMesher.chunk(array);
         // Reset buffer to starting position
-        buf.seek(0);
 
         int verticeSize = 0;
         int indexSize = 0;

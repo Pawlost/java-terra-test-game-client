@@ -67,7 +67,7 @@ public class TestGame extends SimpleApplication {
         setupWorld();
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 4, 4, 0);
+                cam.getLocation().z, 10, 10, 0);
 
         //Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
@@ -81,7 +81,7 @@ public class TestGame extends SimpleApplication {
     }
 
     private void setupWorld() {
-        listener = new MeshListener(mat, geomCreateQueue, geomDeleteQueue);
+        listener = new MeshListener(mat, reg, geomCreateQueue, geomDeleteQueue);
         WorldGeneratorInterface<?> gen = new WeltschmerzWorldGenerator().setup(reg, mod);
         chunkLoader = new ChunkLoader(listener);
 

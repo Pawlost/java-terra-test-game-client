@@ -5,6 +5,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
 import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
+import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.offheap.node.OffheapChunk;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 
@@ -13,13 +14,15 @@ import java.util.concurrent.BlockingQueue;
 
 public class MeshListener implements WorldLoadListener {
     private Material mat;
+    private MaterialRegistry reg;
     private BlockingQueue<Geometry> geomCreateQueue;
     private BlockingQueue<String>  geomDeleteQueue;
 
-    public MeshListener(Material mat, BlockingQueue<Geometry> geomCreateQueue, BlockingQueue<String>  geomDeleteQueue) {
+    public MeshListener(Material mat, MaterialRegistry reg, BlockingQueue<Geometry> geomCreateQueue, BlockingQueue<String>  geomDeleteQueue) {
         this.mat = mat;
         this.geomCreateQueue = geomCreateQueue;
         this.geomDeleteQueue = geomDeleteQueue;
+        this.reg = reg;
     }
 
     @Override
@@ -44,7 +47,7 @@ public class MeshListener implements WorldLoadListener {
     @Override
     public void chunkLoaded(OffheapChunk chunk) {
 
-        Mesh mesh = JMEMesherWrapper.createMesh(chunk.getBuffer());
+        Mesh mesh = JMEMesherWrapper.createMesh(chunk.getLArray(), reg);
 
         mesh.updateBound();
 
