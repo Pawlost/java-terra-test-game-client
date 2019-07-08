@@ -9,7 +9,7 @@ import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
 import com.ritualsoftheold.terra.core.TerraModule;
-import com.ritualsoftheold.terra.core.gen.interfaces.world.WorldGeneratorInterface;
+import com.ritualsoftheold.terra.offheap.WorldGeneratorInterface;
 import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.core.material.TerraTexture;
 import com.ritualsoftheold.terra.mesher.resource.TextureManager;
@@ -23,6 +23,8 @@ import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 import com.ritualsoftheold.testgame.utils.InputHandler;
 import com.ritualsoftheold.testgame.generation.MeshListener;
 import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
+import com.ritualsoftheold.weltschmerz.core.Weltschmerz;
+import com.ritualsoftheold.weltschmerz.landmass.Zone;
 import com.ritualsoftheold.weltschmerz.noise.generators.WorldNoise;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -67,7 +69,7 @@ public class TestGame extends SimpleApplication {
         setupWorld();
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 10, 10, 0);
+                cam.getLocation().z, 20, 20, 0);
 
         //Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
@@ -76,40 +78,15 @@ public class TestGame extends SimpleApplication {
 
         new InputHandler(inputManager, null, terrain, mat, cam);
 
-        world.setLoadListener(listener);
         new Thread(() -> world.initialChunkGeneration(player)).start();
     }
 
     private void setupWorld() {
         listener = new MeshListener(mat, reg, geomCreateQueue, geomDeleteQueue);
-        WorldGeneratorInterface<?> gen = new WeltschmerzWorldGenerator().setup(reg, mod);
+        WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
         chunkLoader = new ChunkLoader(listener);
 
-        ChunkBuffer.Builder bufferBuilder = new ChunkBuffer.Builder()
-                .maxChunks(128)
-                .queueSize(4);
-
-        world = new OffheapWorld.Builder()
-                .chunkLoader(chunkLoader)
-                .octreeLoader(new DummyOctreeLoader(322768))
-                .storageExecutor(ForkJoinPool.commonPool())
-                .chunkStorage(bufferBuilder, 10000000)
-                .octreeStorage(322768)
-                .generator(gen)
-                .generatorExecutor(ForkJoinPool.commonPool())
-                .materialRegistry(reg)
-                .memorySettings(10000000, 10000000, new MemoryPanicHandler() {
-
-                    @Override
-                    public PanicResult outOfMemory(long max, long used, long possible) {
-                        return PanicResult.CONTINUE;
-                    }
-
-                    @Override
-                    public PanicResult goalNotMet(long goal, long possible) {
-                        return PanicResult.CONTINUE;
-                    }
-                }).build(WorldNoise.MAX_SECTOR_HEIGHT_DIFFERENCE);
+        world = new OffheapWorld(gen, reg, WorldNoise.MAX_SECTOR_HEIGHT_DIFFERENCE * 2, listener);
     }
 
     private void setupMaterials() {
