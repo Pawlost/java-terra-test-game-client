@@ -50,7 +50,7 @@ public class TestGame extends SimpleApplication {
         TestGame app = new TestGame();
         app.showSettings = false;
         app.settings = new AppSettings(true);
-        app.settings.setResolution(1600, 900);
+        app.settings.setResolution(1024, 768);
         app.settings.setTitle("Terra testgame");
         app.settings.setFullscreen(false);
         app.start();
@@ -69,7 +69,7 @@ public class TestGame extends SimpleApplication {
         setupWorld();
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 20, 20, 0);
+                cam.getLocation().z, 4, 4, 0);
 
         //Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
@@ -86,7 +86,7 @@ public class TestGame extends SimpleApplication {
         WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
         chunkLoader = new ChunkLoader(listener);
 
-        world = new OffheapWorld(gen, reg, WorldNoise.MAX_SECTOR_HEIGHT_DIFFERENCE * 2, listener);
+        world = new OffheapWorld(gen, reg, 8 , listener);
     }
 
     private void setupMaterials() {
