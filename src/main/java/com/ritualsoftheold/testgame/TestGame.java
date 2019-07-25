@@ -3,6 +3,7 @@ package com.ritualsoftheold.testgame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
@@ -67,9 +68,10 @@ public class TestGame extends SimpleApplication {
         initUI();
         setupMaterials();
         setupWorld();
+        cam.setLocation(new Vector3f(50,50,50));
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 4, 4, 0);
+                cam.getLocation().z, 2, 2, 0);
 
         //Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
