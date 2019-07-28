@@ -51,7 +51,7 @@ public class TestGame extends SimpleApplication {
         TestGame app = new TestGame();
         app.showSettings = false;
         app.settings = new AppSettings(true);
-        app.settings.setResolution(1024, 768);
+        app.settings.setResolution(1600, 900);
         app.settings.setTitle("Terra testgame");
         app.settings.setFullscreen(false);
         app.start();
@@ -71,7 +71,7 @@ public class TestGame extends SimpleApplication {
         cam.setLocation(new Vector3f(50,50,50));
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 2, 2, 0);
+                cam.getLocation().z, 8, 8, 0);
 
         //Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
 
