@@ -68,7 +68,7 @@ public class TestGame extends SimpleApplication {
         initUI();
         setupMaterials();
         setupWorld();
-        cam.setLocation(new Vector3f(50,50,50));
+        cam.setLocation(new Vector3f(0,0,50));
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
                 cam.getLocation().z, 8, 8, 0);
