@@ -15,7 +15,6 @@ import java.util.concurrent.BlockingQueue;
 
 public class MeshListener implements WorldLoadListener {
     private Material mat;
-    private MaterialRegistry reg;
     private BlockingQueue<Geometry> geomCreateQueue;
     private BlockingQueue<String>  geomDeleteQueue;
 
@@ -23,7 +22,6 @@ public class MeshListener implements WorldLoadListener {
         this.mat = mat;
         this.geomCreateQueue = geomCreateQueue;
         this.geomDeleteQueue = geomDeleteQueue;
-        this.reg = reg;
     }
 
     @Override

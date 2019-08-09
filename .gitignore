@@ -1,6 +1,11 @@
+#IntelliJ
 /.idea/
 /.gradle/
 **/build/
 **/out/
-*.png
 *.log
+
+#Private assets
+*.fbx
+**/models/
+**/textures/

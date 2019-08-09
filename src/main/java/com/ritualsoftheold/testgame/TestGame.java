@@ -14,31 +14,21 @@ import com.ritualsoftheold.terra.offheap.WorldGeneratorInterface;
 import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.core.material.TerraTexture;
 import com.ritualsoftheold.terra.mesher.resource.TextureManager;
-import com.ritualsoftheold.terra.offheap.chunk.ChunkBuffer;
-import com.ritualsoftheold.terra.offheap.io.ChunkLoader;
-import com.ritualsoftheold.terra.offheap.io.dummy.DummyOctreeLoader;
-import com.ritualsoftheold.terra.offheap.memory.MemoryPanicHandler;
 import com.ritualsoftheold.terra.offheap.world.OffheapLoadMarker;
 import com.ritualsoftheold.terra.offheap.world.OffheapWorld;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 import com.ritualsoftheold.testgame.utils.InputHandler;
 import com.ritualsoftheold.testgame.generation.MeshListener;
 import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
-import com.ritualsoftheold.weltschmerz.core.Weltschmerz;
-import com.ritualsoftheold.weltschmerz.landmass.Zone;
-import com.ritualsoftheold.weltschmerz.noise.generators.WorldNoise;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ForkJoinPool;
 
 public class TestGame extends SimpleApplication {
 
     private OffheapWorld world;
     private Material mat;
     private BitmapText playerPosition;
-    private WorldLoadListener listener;
-    private ChunkLoader chunkLoader;
     private MaterialRegistry reg;
     private Node terrain;
     private TerraModule mod;
@@ -51,7 +41,7 @@ public class TestGame extends SimpleApplication {
         TestGame app = new TestGame();
         app.showSettings = false;
         app.settings = new AppSettings(true);
-        app.settings.setResolution(1600, 900);
+        app.settings.setResolution(1200, 500);
         app.settings.setTitle("Terra testgame");
         app.settings.setFullscreen(false);
         app.start();
@@ -84,9 +74,8 @@ public class TestGame extends SimpleApplication {
     }
 
     private void setupWorld() {
-        listener = new MeshListener(mat, reg, geomCreateQueue, geomDeleteQueue);
+        WorldLoadListener listener = new MeshListener(mat, reg, geomCreateQueue, geomDeleteQueue);
         WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
-        chunkLoader = new ChunkLoader(listener);
 
         world = new OffheapWorld(gen, reg, 8 , listener);
     }
@@ -135,7 +124,7 @@ public class TestGame extends SimpleApplication {
                 }
 
                 player.move(playerX, (int) cam.getLocation().y, playerZ);
-                new Thread(() -> {world.updateLoadMarker(player, false); }).start();
+                new Thread(() -> world.updateLoadMarker(player, false)).start();
             }
         }
 
