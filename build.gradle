@@ -81,6 +81,10 @@ project(':Weltschmerz:heightmap-generator') {
 }
 
 
+configurations {
+    junion
+}
+
 dependencies {
     compile project('Terra:terra-core')
     compile project('Terra:terra-offheap')
@@ -90,8 +94,25 @@ dependencies {
 
     compile 'org.jmonkeyengine:jme3-desktop:3.2.2-stable'
     compile 'org.jmonkeyengine:jme3-lwjgl3:3.2.2-stable'
+    compile files('libs/junion1.2.2.jar')
+    junion files('libs/junionc1.2.2.jar')
+}
+task junionTask(type: JavaExec) {
+    doLast{
+        classpath configurations.junion
+        classpath += sourceSets.main.runtimeClasspath
+        main = 'theleo.jstruct.plugin.SourceCompiler'
+        args = ['-classpath', sourceSets.main.runtimeClasspath.getAsPath(),
+                '-version', '12',
+                '-sourcepath', files(sourceSets.main.java.srcDirs).getAsPath(),
+                '-outputpath', file('build/generated').getPath()
+        ]
+        sourceSets.main.java.srcDirs = ['build/generated']
+    }
+
 }
 
+build.dependsOn junionTask
 test {
     exclude '**/*'
 }
