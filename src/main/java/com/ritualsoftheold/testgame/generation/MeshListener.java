@@ -18,7 +18,7 @@ public class MeshListener implements WorldLoadListener {
     private BlockingQueue<Geometry> geomCreateQueue;
     private BlockingQueue<String>  geomDeleteQueue;
 
-    public MeshListener(Material mat, MaterialRegistry reg, BlockingQueue<Geometry> geomCreateQueue, BlockingQueue<String>  geomDeleteQueue) {
+    public MeshListener(Material mat,  BlockingQueue<Geometry> geomCreateQueue, BlockingQueue<String>  geomDeleteQueue) {
         this.mat = mat;
         this.geomCreateQueue = geomCreateQueue;
         this.geomDeleteQueue = geomDeleteQueue;
@@ -58,7 +58,6 @@ public class MeshListener implements WorldLoadListener {
 
     @Override
     public void chunkUnloaded(ChunkLArray chunk) {
-
         float x = chunk.x;
         float y = chunk.y;
         float z = chunk.z;

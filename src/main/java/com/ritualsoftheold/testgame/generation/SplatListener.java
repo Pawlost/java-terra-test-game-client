@@ -10,26 +10,22 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
-import com.ritualsoftheold.terra.mesher.GreedyMesher;
 import com.ritualsoftheold.terra.mesher.SplatMesher;
-import com.ritualsoftheold.terra.mesher.VoxelMesher;
-import com.ritualsoftheold.terra.mesher.resource.MeshContainer;
 import com.ritualsoftheold.terra.mesher.resource.TextureManager;
-import com.ritualsoftheold.terra.offheap.Pointer;
-import com.ritualsoftheold.terra.offheap.node.OffheapChunk;
+import com.ritualsoftheold.terra.offheap.chunk.ChunkLArray;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 
+import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 
-public class WeltschmerzListenerSplat implements WorldLoadListener {
-    private VoxelMesher mesher;
-    private TextureManager texManager;
+public class SplatListener implements WorldLoadListener {
+    private SplatMesher mesher;
     private Material mat;
     private BlockingQueue<Geometry> geomCreateQueue;
+    private BlockingQueue<String> geomDeleteQueue;
 
-    public WeltschmerzListenerSplat(TextureManager texManager, Material mat, BlockingQueue<Geometry> geomCreateQueue) {
+    public SplatListener(Material mat, BlockingQueue<Geometry> geomCreateQueue) {
         mesher = new SplatMesher();
-        this.texManager = texManager;
         this.mat = mat;
         this.geomCreateQueue = geomCreateQueue;
     }
@@ -40,41 +36,54 @@ public class WeltschmerzListenerSplat implements WorldLoadListener {
     }
 
     @Override
-    public void chunkLoaded(OffheapChunk chunk, float x, float y, float z, LoadMarker trigger) {
+    public void chunkLoaded(ChunkLArray chunk) {
         //System.out.println("Loaded chunk: " + chunk.memoryAddress());
-        MeshContainer container = new MeshContainer();
-        mesher.chunk(chunk.getBuffer(), texManager, container);
+        ArrayList<Vector3f> vector3fsArray = new ArrayList<>();
+        ArrayList<ColorRGBA> colorsArray = new ArrayList<>();
+
+        mesher.chunk(chunk, vector3fsArray, colorsArray);
 
         // Create mesh
         Mesh mesh = new Mesh();
         mesh.setMode(Mesh.Mode.Points);
 
         //Set coordinates
-        Vector3f[] vector3fs = new Vector3f[container.getVertice().toArray().length];
-        container.getVertice().toArray(vector3fs);
+        Vector3f[] vector3fs = new Vector3f[vector3fsArray.size()];
+        vector3fsArray.toArray(vector3fs);
         mesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(vector3fs));
         //Connects triangles
-        ColorRGBA[] colorRGBAs = new ColorRGBA[container.getColors().toArray().length];
-        container.getColors().toArray(colorRGBAs);
+        ColorRGBA[] colorRGBAs = new ColorRGBA[colorsArray.size()];
+        colorsArray.toArray(colorRGBAs);
         mesh.setBuffer(VertexBuffer.Type.Color,4,BufferUtils.createFloatBuffer(colorRGBAs));
 
         //Update mesh
         mesh.updateBound();
 
         // Create geometry
-        Geometry geom = new Geometry("chunk:" + x + "," + y + "," + z, mesh);
+        Geometry geom = new Geometry("chunk:" + chunk.x + "," + chunk.y + "," + chunk.z, mesh);
 
         // Create material
         geom.setMaterial(mat);
 
         //Set chunk position in world
         geom.setShadowMode(RenderQueue.ShadowMode.Cast);
-        geom.setLocalTranslation(x*4f, y*4f, z*4f);
+        geom.setLocalTranslation(chunk.x, chunk.y, chunk.z);
         geom.setCullHint(Spatial.CullHint.Never);
-
-        container.clear();
 
         // Place geometry in queue for main thread
         geomCreateQueue.add(geom);
+    }
+
+    @Override
+    public void chunkUnloaded(ChunkLArray chunk) {
+        float x = chunk.x;
+        float y = chunk.y;
+        float z = chunk.z;
+
+        // Create geometry
+        String name = "chunk:" + x + "," + y + "," + z;
+
+        // Place geometry in queue for main thread
+        geomDeleteQueue.add(name);
     }
 }
