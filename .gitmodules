@@ -10,3 +10,6 @@
 [submodule "Heisenberg"]
 	path = Heisenberg
 	url = https://github.com/starandserpent/Heisenberg.git
+[submodule "3D-model-loader"]
+	path = 3D-model-loader
+	url = https://github.com/starandserpent/3D-model-loader

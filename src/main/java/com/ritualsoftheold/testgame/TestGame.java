@@ -3,12 +3,16 @@ package com.ritualsoftheold.testgame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
+import com.ritualsoftheold.loader.ModelLoader3D;
 import com.ritualsoftheold.terra.core.TerraModule;
 import com.ritualsoftheold.terra.offheap.WorldGeneratorInterface;
 import com.ritualsoftheold.terra.core.material.MaterialRegistry;
@@ -20,6 +24,7 @@ import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 import com.ritualsoftheold.testgame.utils.InputHandler;
 import com.ritualsoftheold.testgame.generation.MeshListener;
 import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
+import com.ritualsoftheold.testgame.utils.Picker;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -51,6 +56,24 @@ public class TestGame extends SimpleApplication {
     public void simpleInitApp() {
         //setDisplayFps(false);
         //setDisplayStatView(false);
+        //Testing
+        Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        material.setColor("Color", ColorRGBA.Blue);
+
+        for(int x =0; x < 20;x++) {
+            for(int y =0; y < 20;y++) {
+                Box floor = new Box(0.25f, 0.25f, 0.25f);
+                Geometry geometry = new Geometry("chunk:"+x+":"+y, floor);
+                geometry.setLocalTranslation(x*0.25f, 0.0f, y*0.25f);
+                geometry.setMaterial(material);
+                rootNode.attachChild(geometry);
+            }
+        }
+
+        ModelLoader3D modelLoader3D = new ModelLoader3D(assetManager);
+        Spatial custom = modelLoader3D.getAsset("Tall_grass", 2);
+
+        custom.setMaterial(modelLoader3D.getMaterial());
 
         terrain = new Node("Terrain");
         rootNode.attachChild(terrain);
@@ -63,12 +86,14 @@ public class TestGame extends SimpleApplication {
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
                 cam.getLocation().z, 8, 8, 0);
 
-        //Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
+        Picker picker = new Picker(rootNode);
+        picker.setGeometry(custom);
 
         // Some config options
-        flyCam.setMoveSpeed(40);
+        flyCam.setMoveSpeed(20);
 
-        new InputHandler(inputManager, null, terrain, mat, cam);
+        InputHandler input = new InputHandler(inputManager, picker, rootNode, cam);
+        input.addMaterial(material);
 
         new Thread(() -> world.initialChunkGeneration(player)).start();
     }
@@ -94,7 +119,7 @@ public class TestGame extends SimpleApplication {
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-        mat = new Material(assetManager, "/shaders/terra/TerraArray.j3md");
+        mat = new Material(assetManager, "/shaders/terra/voxel/TerraArray.j3md");
         mat.setTexture("ColorMap", atlasTexture);
     }
 
@@ -157,8 +182,8 @@ public class TestGame extends SimpleApplication {
         guiNode.attachChild(ch);
 
         playerPosition = new BitmapText(guiFont, false);
-        playerPosition.setSize(guiFont.getCharSet().getRenderedSize() * 2);
-        playerPosition.setLocalTranslation(0, 800, 0);
+        playerPosition.setSize(guiFont.getCharSet().getRenderedSize());
+        playerPosition.setLocalTranslation(0, (settings.getHeight()/4f)*3, 0);
         guiNode.attachChild(playerPosition);
     }
 }
