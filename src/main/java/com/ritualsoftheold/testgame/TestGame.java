@@ -3,39 +3,37 @@ package com.ritualsoftheold.testgame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
+import com.ritualsoftheold.loader.ModelLoader3D;
 import com.ritualsoftheold.terra.core.TerraModule;
-import com.ritualsoftheold.terra.core.gen.interfaces.world.WorldGeneratorInterface;
+import com.ritualsoftheold.terra.offheap.WorldGeneratorInterface;
 import com.ritualsoftheold.terra.core.material.MaterialRegistry;
 import com.ritualsoftheold.terra.core.material.TerraTexture;
 import com.ritualsoftheold.terra.mesher.resource.TextureManager;
-import com.ritualsoftheold.terra.offheap.chunk.ChunkBuffer;
-import com.ritualsoftheold.terra.offheap.io.ChunkLoader;
-import com.ritualsoftheold.terra.offheap.io.dummy.DummyOctreeLoader;
-import com.ritualsoftheold.terra.offheap.memory.MemoryPanicHandler;
 import com.ritualsoftheold.terra.offheap.world.OffheapLoadMarker;
 import com.ritualsoftheold.terra.offheap.world.OffheapWorld;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 import com.ritualsoftheold.testgame.utils.InputHandler;
 import com.ritualsoftheold.testgame.generation.MeshListener;
 import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
-import com.ritualsoftheold.weltschmerz.noise.generators.WorldNoise;
+import com.ritualsoftheold.testgame.utils.Picker;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ForkJoinPool;
 
 public class TestGame extends SimpleApplication {
 
     private OffheapWorld world;
     private Material mat;
     private BitmapText playerPosition;
-    private WorldLoadListener listener;
-    private ChunkLoader chunkLoader;
     private MaterialRegistry reg;
     private Node terrain;
     private TerraModule mod;
@@ -48,7 +46,7 @@ public class TestGame extends SimpleApplication {
         TestGame app = new TestGame();
         app.showSettings = false;
         app.settings = new AppSettings(true);
-        app.settings.setResolution(1600, 900);
+        app.settings.setResolution(1200, 500);
         app.settings.setTitle("Terra testgame");
         app.settings.setFullscreen(false);
         app.start();
@@ -58,6 +56,24 @@ public class TestGame extends SimpleApplication {
     public void simpleInitApp() {
         //setDisplayFps(false);
         //setDisplayStatView(false);
+        //Testing
+        Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        material.setColor("Color", ColorRGBA.Blue);
+
+        for(int x =0; x < 20;x++) {
+            for(int y =0; y < 20;y++) {
+                Box floor = new Box(0.25f, 0.25f, 0.25f);
+                Geometry geometry = new Geometry("chunk:"+x+":"+y, floor);
+                geometry.setLocalTranslation(x*0.25f, 0.0f, y*0.25f);
+                geometry.setMaterial(material);
+                rootNode.attachChild(geometry);
+            }
+        }
+
+        ModelLoader3D modelLoader3D = new ModelLoader3D(assetManager);
+        Spatial custom = modelLoader3D.getAsset("Tall_grass", 2);
+
+        custom.setMaterial(modelLoader3D.getMaterial());
 
         terrain = new Node("Terrain");
         rootNode.attachChild(terrain);
@@ -65,51 +81,28 @@ public class TestGame extends SimpleApplication {
         initUI();
         setupMaterials();
         setupWorld();
+        cam.setLocation(new Vector3f(0,0,50));
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 10, 10, 0);
+                cam.getLocation().z, 8, 8, 0);
 
-        //Picker picker = new Picker(chunkLoader, player, reg.getMaterial(mod, "grass"), reg.getMaterial("base:air"));
+        Picker picker = new Picker(rootNode);
+        picker.setGeometry(custom);
 
         // Some config options
-        flyCam.setMoveSpeed(40);
+        flyCam.setMoveSpeed(20);
 
-        new InputHandler(inputManager, null, terrain, mat, cam);
+        InputHandler input = new InputHandler(inputManager, picker, rootNode, cam);
+        input.addMaterial(material);
 
-        world.setLoadListener(listener);
         new Thread(() -> world.initialChunkGeneration(player)).start();
     }
 
     private void setupWorld() {
-        listener = new MeshListener(mat, reg, geomCreateQueue, geomDeleteQueue);
-        WorldGeneratorInterface<?> gen = new WeltschmerzWorldGenerator().setup(reg, mod);
-        chunkLoader = new ChunkLoader(listener);
+        WorldLoadListener listener = new MeshListener(mat, reg, geomCreateQueue, geomDeleteQueue);
+        WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
 
-        ChunkBuffer.Builder bufferBuilder = new ChunkBuffer.Builder()
-                .maxChunks(128)
-                .queueSize(4);
-
-        world = new OffheapWorld.Builder()
-                .chunkLoader(chunkLoader)
-                .octreeLoader(new DummyOctreeLoader(322768))
-                .storageExecutor(ForkJoinPool.commonPool())
-                .chunkStorage(bufferBuilder, 10000000)
-                .octreeStorage(322768)
-                .generator(gen)
-                .generatorExecutor(ForkJoinPool.commonPool())
-                .materialRegistry(reg)
-                .memorySettings(10000000, 10000000, new MemoryPanicHandler() {
-
-                    @Override
-                    public PanicResult outOfMemory(long max, long used, long possible) {
-                        return PanicResult.CONTINUE;
-                    }
-
-                    @Override
-                    public PanicResult goalNotMet(long goal, long possible) {
-                        return PanicResult.CONTINUE;
-                    }
-                }).build(WorldNoise.MAX_SECTOR_HEIGHT_DIFFERENCE);
+        world = new OffheapWorld(gen, reg, 8 , listener);
     }
 
     private void setupMaterials() {
@@ -126,7 +119,7 @@ public class TestGame extends SimpleApplication {
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-        mat = new Material(assetManager, "/shaders/terra/TerraArray.j3md");
+        mat = new Material(assetManager, "/shaders/terra/voxel/TerraArray.j3md");
         mat.setTexture("ColorMap", atlasTexture);
     }
 
@@ -156,7 +149,7 @@ public class TestGame extends SimpleApplication {
                 }
 
                 player.move(playerX, (int) cam.getLocation().y, playerZ);
-                new Thread(() -> {world.updateLoadMarker(player, false); }).start();
+                new Thread(() -> world.updateLoadMarker(player, false)).start();
             }
         }
 
@@ -189,8 +182,8 @@ public class TestGame extends SimpleApplication {
         guiNode.attachChild(ch);
 
         playerPosition = new BitmapText(guiFont, false);
-        playerPosition.setSize(guiFont.getCharSet().getRenderedSize() * 2);
-        playerPosition.setLocalTranslation(0, 800, 0);
+        playerPosition.setSize(guiFont.getCharSet().getRenderedSize());
+        playerPosition.setLocalTranslation(0, (settings.getHeight()/4f)*3, 0);
         guiNode.attachChild(playerPosition);
     }
 }

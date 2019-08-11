@@ -14,17 +14,18 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import com.ritualsoftheold.testgame.utils.Picker;
 
+import java.util.ArrayList;
+
 public class InputHandler implements ActionListener {
 
     private Picker picker;
     private Node terrain;
     private boolean wireframe = false;
-    private Material mat;
+    private ArrayList<Material> materials;
     private Camera cam;
 
-    public InputHandler(InputManager inputManager, Picker picker, Node terrain, Material mat, Camera cam){
-
-        this.mat = mat;
+    public InputHandler(InputManager inputManager, Picker picker, Node terrain, Camera cam){
+        materials = new ArrayList<>();
         this.picker = picker;
         this.terrain = terrain;
         this.cam = cam;
@@ -52,7 +53,9 @@ public class InputHandler implements ActionListener {
     public void onAction(String name, boolean isPressed, float tpf) {
         if (name.equals("toggle wireframe") && !isPressed) {
             wireframe = !wireframe; // toggle boolean
-            mat.getAdditionalRenderState().setWireframe(wireframe);
+            for(Material mat:materials) {
+                mat.getAdditionalRenderState().setWireframe(wireframe);
+            }
         }
 
         if (name.equals("Pick") && !isPressed) {
@@ -83,8 +86,8 @@ public class InputHandler implements ActionListener {
             terrain.collideWith(ray, results);
             // For each hit, we know distance, impact point, name of geometry.
             if(results.size() > 0) {
-//                picker.prepare(results);
-  //              picker.place();
+                picker.prepare(results);
+                picker.placeGeometry();
             }
         }
 
@@ -97,5 +100,9 @@ public class InputHandler implements ActionListener {
                 picker.changeMaterial();
             }
         }
+    }
+
+    public void addMaterial(Material material){
+        materials.add(material);
     }
 }

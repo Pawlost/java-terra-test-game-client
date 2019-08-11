@@ -6,6 +6,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
 import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
 import com.ritualsoftheold.terra.core.material.MaterialRegistry;
+import com.ritualsoftheold.terra.offheap.chunk.ChunkLArray;
 import com.ritualsoftheold.terra.offheap.node.OffheapChunk;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 
@@ -14,7 +15,6 @@ import java.util.concurrent.BlockingQueue;
 
 public class MeshListener implements WorldLoadListener {
     private Material mat;
-    private MaterialRegistry reg;
     private BlockingQueue<Geometry> geomCreateQueue;
     private BlockingQueue<String>  geomDeleteQueue;
 
@@ -22,7 +22,6 @@ public class MeshListener implements WorldLoadListener {
         this.mat = mat;
         this.geomCreateQueue = geomCreateQueue;
         this.geomDeleteQueue = geomDeleteQueue;
-        this.reg = reg;
     }
 
     @Override
@@ -31,41 +30,43 @@ public class MeshListener implements WorldLoadListener {
     }
 
     @Override
-    public void chunkUnloaded(OffheapChunk chunk) {
+    public void chunkLoaded(ChunkLArray chunk) {
 
-        float x = chunk.getX();
-        float y = chunk.getY();
-        float z = chunk.getZ();
+        Mesh mesh = JMEMesherWrapper.createMesh(chunk);
+
+        if(mesh != null) {
+            mesh.updateBound();
+
+            float x = chunk.x;
+            float y = chunk.y;
+            float z = chunk.z;
+
+            // Create geometry
+            Geometry geom = new Geometry("chunk:" + x + "," + y + "," + z, mesh);
+
+            // Create material
+            geom.setMaterial(mat);
+
+            //Set chunk position in world
+            geom.setLocalTranslation(x, y, z);
+            geom.setCullHint(Spatial.CullHint.Never);
+
+            // Place geometry in queue for main thread
+            geomCreateQueue.add(geom);
+        }
+    }
+
+    @Override
+    public void chunkUnloaded(ChunkLArray chunk) {
+
+        float x = chunk.x;
+        float y = chunk.y;
+        float z = chunk.z;
 
         // Create geometry
         String name = "chunk:" + x + "," + y + "," + z;
 
         // Place geometry in queue for main thread
         geomDeleteQueue.add(name);
-    }
-
-    @Override
-    public void chunkLoaded(OffheapChunk chunk) {
-
-        Mesh mesh = JMEMesherWrapper.createMesh(chunk.getLArray(), reg);
-
-        mesh.updateBound();
-
-        float x = chunk.getX();
-        float y = chunk.getY();
-        float z = chunk.getZ();
-
-        // Create geometry
-        Geometry geom = new Geometry("chunk:" + x + "," + y + "," + z, mesh);
-
-        // Create material
-        geom.setMaterial(mat);
-
-        //Set chunk position in world
-        geom.setLocalTranslation(x, y, z);
-        geom.setCullHint(Spatial.CullHint.Never);
-
-        // Place geometry in queue for main thread
-        geomCreateQueue.add(geom);
     }
 }

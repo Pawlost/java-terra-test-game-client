@@ -4,6 +4,8 @@ apply from: 'Weltschmerz/settings.gradle'
 
 rootProject.name = 'TestGame'
 
-include 'Terra:terra-core', 'Terra:terra-offheap', 'Terra:terra-meshgen'
-include ':Weltschmerz:weltschmerz-core', ':Weltschmerz:weltschmerz-landmass',
-        ':Weltschmerz:weltschmerz-noise', ':Weltschmerz:heightmap-generator', ':Weltschmerz:weltschmerz-geometry'
+include ':Terra:terra-core', ':Terra:terra-offheap', ':Terra:terra-meshgen', ':Terra:terra-io-files'
+include '3D-model-loader'
+include ':Weltschmerz:weltschmerz-core', ':Weltschmerz:weltschmerz-environment',
+        ':Weltschmerz:heightmap-generator', ':Weltschmerz:weltschmerz-misc'
+

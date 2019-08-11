@@ -38,6 +38,7 @@ project(':Terra:terra-meshgen') {
     dependencies {
         compile project(':Terra:terra-offheap')
         compile project(':Terra:terra-core')
+        compile project(':Terra:terra-io-files')
     }
     test {
         exclude '**/*'
@@ -50,33 +51,24 @@ project(':Terra:terra-core') {
     }
 }
 
-project(':Weltschmerz:weltschmerz-noise') {
+project(':Weltschmerz:weltschmerz-environment') {
     dependencies {
-        compile project(':Weltschmerz:weltschmerz-geometry')
-    }
-}
-
-project(':Weltschmerz:weltschmerz-landmass') {
-    dependencies {
-        compile project(':Weltschmerz:weltschmerz-noise')
-        compile project(':Weltschmerz:weltschmerz-geometry')
+        compile project(':Weltschmerz:weltschmerz-misc')
     }
 }
 
 project(':Weltschmerz:weltschmerz-core') {
     dependencies {
-        compile project(':Weltschmerz:weltschmerz-noise')
-        compile project(':Weltschmerz:weltschmerz-landmass')
-        compile project(':Weltschmerz:weltschmerz-geometry')
+        compile project(':Weltschmerz:weltschmerz-environment')
+        compile project(':Weltschmerz:weltschmerz-misc')
     }
 }
 
 project(':Weltschmerz:heightmap-generator') {
     dependencies {
         compile project(':Weltschmerz:weltschmerz-core')
-        compile project(':Weltschmerz:weltschmerz-noise')
-        compile project(':Weltschmerz:weltschmerz-landmass')
-        compile project(':Weltschmerz:weltschmerz-geometry')
+        compile project(':Weltschmerz:weltschmerz-environment')
+        compile project(':Weltschmerz:weltschmerz-misc')
     }
 }
 
@@ -86,11 +78,13 @@ configurations {
 }
 
 dependencies {
-    compile project('Terra:terra-core')
-    compile project('Terra:terra-offheap')
-    compile project('Terra:terra-meshgen')
+    compile project(':Terra:terra-core')
+    compile project(':Terra:terra-offheap')
+    compile project(':Terra:terra-meshgen')
+    compile project(':Terra:terra-io-files')
     compile project(':Weltschmerz:weltschmerz-core')
     compile project(':Weltschmerz:heightmap-generator')
+    compile project(':3D-model-loader')
 
     compile 'org.jmonkeyengine:jme3-desktop:3.2.2-stable'
     compile 'org.jmonkeyengine:jme3-lwjgl3:3.2.2-stable'
