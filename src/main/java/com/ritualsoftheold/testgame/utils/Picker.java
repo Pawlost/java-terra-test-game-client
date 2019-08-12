@@ -5,17 +5,13 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.ritualsoftheold.terra.core.material.TerraMaterial;
-import com.ritualsoftheold.terra.offheap.data.BufferWithFormat;
-import com.ritualsoftheold.terra.offheap.io.ChunkLoader;
-import com.ritualsoftheold.terra.offheap.node.OffheapChunk;
-import com.ritualsoftheold.terra.offheap.world.OffheapLoadMarker;
+import com.ritualsoftheold.terra.core.material.TerraObject;
 
 public class Picker {
     private Vector3f collision;
     private Vector3f normals;
-    private TerraMaterial primaryMaterial;
-    private TerraMaterial emptyMaterial;
+    private TerraObject primaryMaterial;
+    private TerraObject emptyMaterial;
     private Node node;
     private Spatial custom;
 
@@ -102,11 +98,11 @@ public class Picker {
         node.attachChild(custom.clone());
     }
 
-    public void setTerraMaterial(TerraMaterial terraMaterial, boolean empty){
+    public void setTerraMaterial(TerraObject terraObject, boolean empty){
         if(empty){
-            emptyMaterial = terraMaterial;
+            emptyMaterial = terraObject;
         }else {
-            primaryMaterial = terraMaterial;
+            primaryMaterial = terraObject;
         }
     }
 

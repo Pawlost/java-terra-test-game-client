@@ -2,23 +2,21 @@ package com.ritualsoftheold.testgame;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
-import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
-import com.ritualsoftheold.terra.core.TerraModule;
-import com.ritualsoftheold.terra.offheap.DataConstants;
+import com.ritualsoftheold.terra.core.material.TerraModule;
 import com.ritualsoftheold.terra.offheap.WorldGeneratorInterface;
-import com.ritualsoftheold.terra.core.material.MaterialRegistry;
-import com.ritualsoftheold.terra.core.material.TerraTexture;
+import com.ritualsoftheold.terra.core.material.Registry;
 import com.ritualsoftheold.terra.mesher.resource.TextureManager;
 import com.ritualsoftheold.terra.offheap.world.OffheapLoadMarker;
 import com.ritualsoftheold.terra.offheap.world.OffheapWorld;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
-import com.ritualsoftheold.testgame.generation.SplatListener;
+import com.ritualsoftheold.testgame.generation.MeshListener;
+import com.ritualsoftheold.testgame.materials.PrimitiveResourcePack;
 import com.ritualsoftheold.testgame.utils.InputHandler;
 import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
 import com.ritualsoftheold.testgame.utils.Picker;
@@ -29,14 +27,11 @@ import java.util.concurrent.BlockingQueue;
 public class TestGame extends SimpleApplication {
 
     private OffheapWorld world;
-    private Material mat;
     private BitmapText playerPosition;
-    private MaterialRegistry reg;
     private Node terrain;
-    private TerraModule mod;
     private OffheapLoadMarker player;
 
-    private BlockingQueue<Geometry> geomCreateQueue = new ArrayBlockingQueue<>(10000);
+    private BlockingQueue<Spatial> geomCreateQueue = new ArrayBlockingQueue<>(10000);
     private BlockingQueue<String> geomDeleteQueue = new ArrayBlockingQueue<>(10000);
 
     public static void main(String... args) {
@@ -54,23 +49,14 @@ public class TestGame extends SimpleApplication {
         //setDisplayFps(false);
         //setDisplayStatView(false);
         //Testing
-       /* Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        material.setColor("Color", ColorRGBA.Blue);
-
-        ModelLoader3D modelLoader3D = new ModelLoader3D(assetManager);
-        Spatial custom = modelLoader3D.getAsset("Tall_grass", 2);
-
-        custom.setMaterial(modelLoader3D.getMaterial());
-        */
 
         terrain = new Node("Terrain");
         rootNode.attachChild(terrain);
 
         initUI();
         setupMaterials();
-        setupWorld();
 
-        cam.setLocation(new Vector3f(0, 0, 50));
+        cam.setLocation(new Vector3f(0, 0, -25));
 
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
@@ -88,20 +74,11 @@ public class TestGame extends SimpleApplication {
         new Thread(() -> world.initialChunkGeneration(player)).start();
     }
 
-    private void setupWorld() {
-        WorldLoadListener listener = new SplatListener(mat, geomCreateQueue);// geomDeleteQueue);
-        WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
-
-        world = new OffheapWorld(gen, reg, 8, listener);
-    }
-
     private void setupMaterials() {
-        mod = new TerraModule("testgame");
-        mod.newMaterial().name("dirt").texture(new TerraTexture("NorthenForestDirt256px.png"));
-        mod.newMaterial().name("grass").texture(new TerraTexture("NorthenForestGrass256px.png"));
-
-        reg = new MaterialRegistry();
-        mod.registerMaterials(reg);
+        TerraModule mod = new TerraModule("testgame");
+        Registry reg = new Registry();
+        PrimitiveResourcePack resourcePack = new PrimitiveResourcePack(reg);
+        resourcePack.registerObjects(mod);
 
         TextureManager texManager = new TextureManager(assetManager, reg);
         TextureArray atlasTexture = texManager.getTextureArray();
@@ -109,8 +86,14 @@ public class TestGame extends SimpleApplication {
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-        mat = new Material(assetManager, "/shaders/terra/splatter/SplatShader.j3md");
-        mat.setFloat("VoxelSize", DataConstants.SMALLEST_BLOCK);
+        WorldLoadListener listener = new MeshListener(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture);// geomDeleteQueue);
+        WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
+
+        world = new OffheapWorld(gen, reg, 8, listener);
+        // mat = new Material(assetManager, "shaders/terra/voxel/NormalShader.j3md");
+        //mat.setTexture("ColorMap", atlasTexture);
+       // mat = new Material(assetManager, "/shaders/terra/splatter/SplatShader.j3md");
+       // mat.setFloat("VoxelSize", DataConstants.SMALLEST_BLOCK);
     }
 
     @Override
@@ -144,7 +127,7 @@ public class TestGame extends SimpleApplication {
         }
 
         while (!geomCreateQueue.isEmpty()) {
-            Geometry geom = geomCreateQueue.poll();
+            Spatial geom = geomCreateQueue.poll();
             if (terrain.getChild(geom.getName()) != null) {
                 terrain.detachChildNamed(geom.getName());
             }
