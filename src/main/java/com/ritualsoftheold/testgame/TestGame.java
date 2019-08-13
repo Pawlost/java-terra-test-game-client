@@ -8,6 +8,8 @@ import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
+import com.ritualsoftheold.loader.BlockMaker;
+import com.ritualsoftheold.loader.ModelLoader3D;
 import com.ritualsoftheold.terra.core.material.TerraModule;
 import com.ritualsoftheold.terra.offheap.WorldGeneratorInterface;
 import com.ritualsoftheold.terra.core.material.Registry;
@@ -78,7 +80,7 @@ public class TestGame extends SimpleApplication {
         TerraModule mod = new TerraModule("testgame");
         Registry reg = new Registry();
         PrimitiveResourcePack resourcePack = new PrimitiveResourcePack(reg);
-        resourcePack.registerObjects(mod);
+        resourcePack.registerObjects(mod, assetManager);
 
         TextureManager texManager = new TextureManager(assetManager, reg);
         TextureArray atlasTexture = texManager.getTextureArray();
@@ -86,7 +88,7 @@ public class TestGame extends SimpleApplication {
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-        WorldLoadListener listener = new MeshListener(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture);// geomDeleteQueue);
+        WorldLoadListener listener = new MeshListener(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture, reg);// geomDeleteQueue);
         WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
 
         world = new OffheapWorld(gen, reg, 8, listener);

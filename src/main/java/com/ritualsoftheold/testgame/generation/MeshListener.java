@@ -2,11 +2,17 @@ package com.ritualsoftheold.testgame.generation;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.scene.*;
+import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
 import com.jme3.util.BufferUtils;
+import com.ritualsoftheold.loader.BlockMaker;
 import com.ritualsoftheold.loader.ModelLoader3D;
+import com.ritualsoftheold.terra.core.Terra;
 import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
+import com.ritualsoftheold.terra.core.material.Registry;
+import com.ritualsoftheold.terra.core.material.TerraObject;
 import com.ritualsoftheold.terra.mesher.Face;
 import com.ritualsoftheold.terra.mesher.GreedyMesher;
 import com.ritualsoftheold.terra.offheap.chunk.ChunkLArray;
@@ -17,6 +23,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 
@@ -27,13 +34,15 @@ public class MeshListener implements WorldLoadListener {
     private ModelLoader3D modelLoader3D;
     private AssetManager assetManager;
     private TextureArray array;
+    private Registry reg;
 
     public MeshListener(AssetManager manager, BlockingQueue<Spatial> geomCreateQueue,
-                        BlockingQueue<String>  geomDeleteQueue, TextureArray array) {
+                        BlockingQueue<String>  geomDeleteQueue, TextureArray array, Registry reg) {
         this.array = array;
         this.geomCreateQueue = geomCreateQueue;
         this.geomDeleteQueue = geomDeleteQueue;
         this.assetManager =  manager;
+        this.reg = reg;
         greedyMesher = new GreedyMesher();
         modelLoader3D = new ModelLoader3D(manager);
     }
@@ -51,7 +60,7 @@ public class MeshListener implements WorldLoadListener {
         HashMap<Integer, HashMap<Integer, Face>> sector = greedyMesher.cull(chunk);
         // Reset buffer to starting position
 
-        if(sector.size() > 0) {
+        if (sector.size() > 0) {
             int verticeSize = 0;
             int indexSize = 0;
             int texCoordSize = 0;
@@ -61,7 +70,7 @@ public class MeshListener implements WorldLoadListener {
             sector.keySet().toArray(keySet);
 
             for (Integer key : keySet) {
-                if(key != 6) {
+                if (key != 6) {
                     HashMap<Integer, Face> faces = sector.get(key);
                     Integer[] keys = new Integer[faces.keySet().size()];
                     faces.keySet().toArray(keys);
@@ -85,7 +94,7 @@ public class MeshListener implements WorldLoadListener {
             FloatBuffer normalsBuffer = BufferUtils.createFloatBuffer(normalSize);
 
             for (Integer key : keySet) {
-                if(key != 6) {
+                if (key != 6) {
                     Integer[] faceSet = new Integer[sector.get(key).keySet().size()];
                     sector.get(key).keySet().toArray(faceSet);
 
@@ -124,28 +133,55 @@ public class MeshListener implements WorldLoadListener {
             node.attachChild(geom);
 
             HashMap<Integer, Face> side = sector.get(6);
-            for(Integer i: side.keySet()){
-                int posZ = i / 4096;
-                int posY = (i - (4096 * posZ)) / 64;
-                int posX = i % 64;
-
-                float x = posX * 0.25f;
-                float y = posY * 0.25f;
-                float z = posZ * 0.25f;
-
-                z += (0.25f/2f);
-                y -= (0.25f/2f);
-                x += (0.25f/2f);
-
+            HashMap<Integer, Integer> size = new HashMap<>();
+            for (Integer i : side.keySet()) {
                 Face face = side.get(i);
-                Spatial asset =  modelLoader3D.getMesh(face.getObject().getMesh().getAsset());
-                asset.setLocalTranslation(x, y, z);
-                asset.setCullHint(Spatial.CullHint.Never);
+                Integer id = face.getObject().getWorldId();
 
-                mat = new Material(assetManager, "shaders/transparency/TransparencyShader.j3md");
-                mat.setTexture("ColorMap", modelLoader3D.getTexture(face.getObject().getTexture().getAsset()));
-                asset.setMaterial(mat);
-                node.attachChild(asset);
+                if (size.get(id) == null) {
+                    size.put(id, 1);
+                    TerraObject object = reg.getForWorldId(id);
+                    int posZ = i / 4096;
+                    int posY = (i - (4096 * posZ)) / 64;
+                    int posX = i % 64;
+                    object.position(posX, posY, posZ);
+                } else {
+                    int s = size.get(id);
+                    s += 1;
+                    size.replace(id, s);
+                }
+
+                Integer[] currentKeys = new Integer[size.keySet().size()];
+                size.keySet().toArray(currentKeys);
+                for (Integer objectId : currentKeys) {
+                    if (objectId != null) {
+                        TerraObject object = reg.getForWorldId(objectId);
+                        if (object.getMesh().getSizeInVoxels() == size.get(objectId)) {
+                            size.remove(objectId);
+
+                            float x = (object.getX() * 0.25f) + (object.getMesh().getLenghtX()/2f);
+                            float y = object.getY() * 0.25f;
+                            float z = (object.getZ() * 0.25f) + (object.getMesh().getLenghtZ()/2f);
+
+
+                            Spatial asset = modelLoader3D.getMesh(object.getMesh().getAsset());
+                            asset.setLocalTranslation(x, y, z);
+                            asset.setCullHint(Spatial.CullHint.Never);
+
+                            if (object.getTexture().hasTexture()) {
+                                Texture texture = modelLoader3D.getTexture(object.getTexture().getAsset());
+                                mat = new Material(assetManager, "shaders/transparency/TransparencyShader.j3md");
+                                mat.setTexture("ColorMap", texture);
+                            } else {
+                                mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                                mat.setColor("Color", ColorRGBA.White);
+                            }
+
+                            asset.setMaterial(mat);
+                            node.attachChild(asset);
+                        }
+                    }
+                }
             }
             side.clear();
 
