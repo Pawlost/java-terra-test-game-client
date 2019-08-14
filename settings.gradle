@@ -8,4 +8,5 @@ include ':Terra:terra-core', ':Terra:terra-offheap', ':Terra:terra-meshgen', ':T
 include '3D-model-loader'
 include ':Weltschmerz:weltschmerz-core', ':Weltschmerz:weltschmerz-environment',
         ':Weltschmerz:heightmap-generator', ':Weltschmerz:weltschmerz-misc'
+include 'Skybox'
 
