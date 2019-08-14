@@ -20,9 +20,9 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface {
         weltschmerz = new Weltschmerz();
         weltschmerz.setBlocksID(reg.getMaterial(mod, "grass").getWorldId(),
                 reg.getMaterial(mod,"dirt").getWorldId(),
-                reg.getMaterial(mod, "Tall_grass").getWorldId());
+                reg.getMaterial(mod, "Tall_Grass-mesh_variant01-01").getWorldId());
 
-        TerraObject tree =  reg.getMaterial(mod, "pretty_tree");
+        TerraObject tree =  reg.getMaterial(mod, "birch-01");
         weltschmerz.setObject(tree.getMesh().getVoxels());
         return this;
     }

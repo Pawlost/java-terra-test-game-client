@@ -22,14 +22,14 @@ public class PrimitiveResourcePack {
         mod.newMaterial().name("dirt").texture(new TerraTexture("NorthenForestDirt256px.png"));
         mod.newMaterial().name("grass").texture(new TerraTexture("NorthenForestGrass256px.png"));
 
-        Spatial asset =  modelLoader3D.getMesh("Tall_grass");
+        Spatial asset =  modelLoader3D.getMesh("Tall_Grass-mesh_variant01-01");
         //Custom meshes
-        mod.newMaterial().name("Tall_grass").model(new TerraMesh("Tall_grass", true,
+        mod.newMaterial().name("Tall_grass").model(new TerraMesh("Tall_Grass-mesh_variant01-01", true,
                 BlockMaker.getBlocks(asset))).texture(new TerraTexture("Tall_grass-texture-2.png",
                 true));
 
         Spatial spatial = modelLoader3D.getMesh("birch-01");
-        mod.newMaterial().name("pretty_tree").model(new TerraMesh("birch-01", true,
+        mod.newMaterial().name("birch-01").model(new TerraMesh("birch-01", true,
                 BlockMaker.getBlocks(spatial))).texture(
                         new TerraTexture("birch_bark_ambient_occlusion-01-4096x4096.dds", true));
 
