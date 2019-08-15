@@ -24,14 +24,20 @@ public class PrimitiveResourcePack {
 
         Spatial asset =  modelLoader3D.getMesh("Tall_Grass-mesh_variant01-01");
         //Custom meshes
-        mod.newMaterial().name("Tall_grass").model(new TerraMesh("Tall_Grass-mesh_variant01-01", true,
-                BlockMaker.getBlocks(asset))).texture(new TerraTexture("Tall_grass-texture-2.png",
-                true));
 
-        Spatial spatial = modelLoader3D.getMesh("birch-01");
-        mod.newMaterial().name("birch-01").model(new TerraMesh("birch-01", true,
-                BlockMaker.getBlocks(spatial))).texture(
-                        new TerraTexture("birch_bark_ambient_occlusion-01-4096x4096.dds", true));
+        BlockMaker maker = new BlockMaker(asset);
+
+        mod.newMaterial().name("Tall_Grass-mesh_variant01-01").model(new TerraMesh("Tall_Grass-mesh_variant01-01",
+                maker.getBlocks(), maker.getDefaultDistanceX(), maker.getDefaultDistanceY(), maker.getDefaultDistanceZ()))
+                .texture(new TerraTexture("Tall_grass-texture-2.png", true));
+
+        Spatial spatial = modelLoader3D.getMesh("birch-02");
+
+        maker = new BlockMaker(spatial);
+
+        mod.newMaterial().name("birch-02").model(new TerraMesh("birch-02", maker.getBlocks(),
+                maker.getDefaultDistanceX(), maker.getDefaultDistanceY(), maker.getDefaultDistanceZ()))
+                .texture(new TerraTexture("birch_bark_ambient_occlusion-01-4096x4096.dds", true));
 
         mod.registerMaterials(reg);
     }

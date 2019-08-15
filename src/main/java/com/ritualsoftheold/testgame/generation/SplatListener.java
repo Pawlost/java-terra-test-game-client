@@ -11,7 +11,6 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
 import com.ritualsoftheold.terra.mesher.SplatMesher;
-import com.ritualsoftheold.terra.mesher.resource.TextureManager;
 import com.ritualsoftheold.terra.offheap.chunk.ChunkLArray;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 

@@ -8,8 +8,6 @@ import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
-import com.ritualsoftheold.loader.BlockMaker;
-import com.ritualsoftheold.loader.ModelLoader3D;
 import com.ritualsoftheold.terra.core.material.TerraModule;
 import com.ritualsoftheold.terra.offheap.WorldGeneratorInterface;
 import com.ritualsoftheold.terra.core.material.Registry;
@@ -62,7 +60,7 @@ public class TestGame extends SimpleApplication {
 
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 8, 8, 0);
+                cam.getLocation().z, 20, 20, 0);
 
         Picker picker = new Picker(rootNode);
         //picker.setGeometry(custom);
@@ -91,7 +89,7 @@ public class TestGame extends SimpleApplication {
         WorldLoadListener listener = new MeshListener(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture, reg);// geomDeleteQueue);
         WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
 
-        world = new OffheapWorld(gen, reg, 8, listener);
+        world = new OffheapWorld(gen, reg, 30, listener);
         // mat = new Material(assetManager, "shaders/terra/voxel/NormalShader.j3md");
         //mat.setTexture("ColorMap", atlasTexture);
        // mat = new Material(assetManager, "/shaders/terra/splatter/SplatShader.j3md");

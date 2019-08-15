@@ -7,9 +7,7 @@ import com.jme3.scene.*;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
 import com.jme3.util.BufferUtils;
-import com.ritualsoftheold.loader.BlockMaker;
 import com.ritualsoftheold.loader.ModelLoader3D;
-import com.ritualsoftheold.terra.core.Terra;
 import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
 import com.ritualsoftheold.terra.core.material.Registry;
 import com.ritualsoftheold.terra.core.material.TerraObject;
@@ -23,7 +21,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 
@@ -156,13 +153,12 @@ public class MeshListener implements WorldLoadListener {
                 for (Integer objectId : currentKeys) {
                     if (objectId != null) {
                         TerraObject object = reg.getForWorldId(objectId);
-                        if (object.getMesh().getSizeInVoxels() == size.get(objectId)) {
+                        if (object.getMesh().getSize() == size.get(objectId)) {
                             size.remove(objectId);
 
-                            float x = (object.getX() * 0.25f) + (object.getMesh().getLenghtX()/2f);
+                            float x = (object.getX() * 0.25f) + (object.getMesh().getDefaultDistanceX()/2f);
                             float y = object.getY() * 0.25f;
-                            float z = (object.getZ() * 0.25f) + (object.getMesh().getLenghtZ()/2f);
-
+                            float z = (object.getZ() * 0.25f) + (object.getMesh().getDefaultDistanceZ()/2f);
 
                             Spatial asset = modelLoader3D.getMesh(object.getMesh().getAsset());
                             asset.setLocalTranslation(x, y, z);
