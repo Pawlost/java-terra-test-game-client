@@ -28,16 +28,16 @@ public class PrimitiveResourcePack {
         BlockMaker maker = new BlockMaker(asset);
 
         mod.newMaterial().name("Tall_Grass-mesh_variant01-01").model(new TerraMesh("Tall_Grass-mesh_variant01-01",
-                maker.getBlocks(), maker.getDefaultDistanceX(), maker.getDefaultDistanceY(), maker.getDefaultDistanceZ()))
+                maker.getDefaultDistanceX(), maker.getDefaultDistanceY(), maker.getDefaultDistanceZ()))
                 .texture(new TerraTexture("Tall_grass-texture-2.png", true));
 
-        Spatial spatial = modelLoader3D.getMesh("birch-02");
+        Spatial spatial = modelLoader3D.getMesh("birch-02_baked");
 
         maker = new BlockMaker(spatial);
 
-        mod.newMaterial().name("birch-02").model(new TerraMesh("birch-02", maker.getBlocks(),
+        mod.newMaterial().name("birch-02_baked").model(new TerraMesh("birch-02_baked",
                 maker.getDefaultDistanceX(), maker.getDefaultDistanceY(), maker.getDefaultDistanceZ()))
-                .texture(new TerraTexture("birch_bark_ambient_occlusion-01-4096x4096.dds", true));
+                .texture(new TerraTexture("birch-02_baked.png", true));
 
         mod.registerMaterials(reg);
     }

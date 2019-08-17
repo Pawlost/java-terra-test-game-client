@@ -2,6 +2,7 @@ package com.ritualsoftheold.testgame.generation;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.*;
 import com.jme3.texture.Texture;
@@ -32,6 +33,7 @@ public class MeshListener implements WorldLoadListener {
     private AssetManager assetManager;
     private TextureArray array;
     private Registry reg;
+    private HashMap<Integer, Integer> unsualMeshSize;
 
     public MeshListener(AssetManager manager, BlockingQueue<Spatial> geomCreateQueue,
                         BlockingQueue<String>  geomDeleteQueue, TextureArray array, Registry reg) {
@@ -42,6 +44,7 @@ public class MeshListener implements WorldLoadListener {
         this.reg = reg;
         greedyMesher = new GreedyMesher();
         modelLoader3D = new ModelLoader3D(manager);
+        unsualMeshSize = new HashMap<>();
     }
 
     @Override
@@ -121,53 +124,53 @@ public class MeshListener implements WorldLoadListener {
 
             Geometry geom = new Geometry("chunk:" + chunk.x + "," + chunk.y + "," + chunk.z, mesh);
             geom.setCullHint(Spatial.CullHint.Never);
-            geom.setLocalTranslation(0, 0, 0);
             Material mat = new Material(assetManager, "shaders/terra/voxel/TerraArray.j3md");
             mat.setTexture("ColorMap", array);
             geom.setMaterial(mat);
+
+            geom.setLocalTranslation(chunk.x, chunk. y, chunk.z);
 
             Node node = new Node();
             node.attachChild(geom);
 
             HashMap<Integer, Face> side = sector.get(6);
-            HashMap<Integer, Integer> size = new HashMap<>();
             for (Integer i : side.keySet()) {
                 Face face = side.get(i);
                 Integer id = face.getObject().getWorldId();
 
-                if (size.get(id) == null) {
-                    size.put(id, 1);
+                if (unsualMeshSize.get(id) == null) {
+                    unsualMeshSize.put(id, 1);
                     TerraObject object = reg.getForWorldId(id);
                     int posZ = i / 4096;
                     int posY = (i - (4096 * posZ)) / 64;
                     int posX = i % 64;
-                    object.position(posX, posY, posZ);
+                    object.position(
+                            (posX*0.25f) + chunk.x + (object.getMesh().getDefaultDistanceX() * 0.25f)/2f,
+                            (posY*0.25f) + chunk.y,
+                            (posZ*0.25f) + chunk.z + (object.getMesh().getDefaultDistanceZ() * 0.25f)/2f);
                 } else {
-                    int s = size.get(id);
+                    int s = unsualMeshSize.get(id);
                     s += 1;
-                    size.replace(id, s);
+                    unsualMeshSize.replace(id, s);
                 }
 
-                Integer[] currentKeys = new Integer[size.keySet().size()];
-                size.keySet().toArray(currentKeys);
+                Integer[] currentKeys = new Integer[unsualMeshSize.keySet().size()];
+                unsualMeshSize.keySet().toArray(currentKeys);
                 for (Integer objectId : currentKeys) {
                     if (objectId != null) {
                         TerraObject object = reg.getForWorldId(objectId);
-                        if (object.getMesh().getSize() == size.get(objectId)) {
-                            size.remove(objectId);
-
-                            float x = (object.getX() * 0.25f) + (object.getMesh().getDefaultDistanceX()/2f);
-                            float y = object.getY() * 0.25f;
-                            float z = (object.getZ() * 0.25f) + (object.getMesh().getDefaultDistanceZ()/2f);
+                        if (object.getMesh().getSize() == unsualMeshSize.get(objectId)) {
+                            unsualMeshSize.remove(objectId);
 
                             Spatial asset = modelLoader3D.getMesh(object.getMesh().getAsset());
-                            asset.setLocalTranslation(x, y, z);
+                            asset.setLocalTranslation(object.getX(), object.getY(), object.getZ());
                             asset.setCullHint(Spatial.CullHint.Never);
 
                             if (object.getTexture().hasTexture()) {
                                 Texture texture = modelLoader3D.getTexture(object.getTexture().getAsset());
                                 mat = new Material(assetManager, "shaders/transparency/TransparencyShader.j3md");
                                 mat.setTexture("ColorMap", texture);
+                                mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
                             } else {
                                 mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
                                 mat.setColor("Color", ColorRGBA.White);
@@ -181,10 +184,8 @@ public class MeshListener implements WorldLoadListener {
             }
             side.clear();
 
-            Spatial spatial = GeometryBatchFactory.optimize(node);
-            spatial.setLocalTranslation(chunk.x, chunk.y, chunk.z);
             // Place geometry in queue for main thread
-            geomCreateQueue.add(spatial);
+            geomCreateQueue.add(GeometryBatchFactory.optimize(node));
         }
     }
 

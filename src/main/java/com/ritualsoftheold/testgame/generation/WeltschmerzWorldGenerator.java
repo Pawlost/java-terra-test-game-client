@@ -14,12 +14,14 @@ public class WeltschmerzWorldGenerator implements WorldGeneratorInterface {
     @Override
     public  WorldGeneratorInterface setup(Registry reg, TerraModule mod) {
         weltschmerz = new Weltschmerz();
-        weltschmerz.setBlocksID(reg.getMaterial(mod, "grass").getWorldId(),
+        weltschmerz.setBlocksID(
+                reg.getMaterial(mod, "grass").getWorldId(),
                 reg.getMaterial(mod,"dirt").getWorldId(),
                 reg.getMaterial(mod, "Tall_Grass-mesh_variant01-01").getWorldId());
 
-        TerraObject tree =  reg.getMaterial(mod, "birch-02");
-        weltschmerz.setObject(tree.getMesh().getVoxels());
+        TerraObject tree =  reg.getMaterial(mod, "birch-02_baked");
+        weltschmerz.setObject(tree.getMesh().getDefaultDistanceX(), tree.getMesh().getDefaultDistanceY(),
+                tree.getMesh().getDefaultDistanceZ(), tree.getMesh().getId());
         return this;
     }
 

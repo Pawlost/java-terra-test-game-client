@@ -46,9 +46,8 @@ public class TestGame extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        //setDisplayFps(false);
+       // setDisplayFps(false);
         //setDisplayStatView(false);
-        //Testing
 
         terrain = new Node("Terrain");
         rootNode.attachChild(terrain);
@@ -56,11 +55,11 @@ public class TestGame extends SimpleApplication {
         initUI();
         setupMaterials();
 
-        cam.setLocation(new Vector3f(0, 0, -25));
+        cam.setLocation(new Vector3f(0, 0, 50));
 
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 20, 20, 0);
+                cam.getLocation().z, 10, 10, 0);
 
         Picker picker = new Picker(rootNode);
         //picker.setGeometry(custom);
@@ -89,7 +88,8 @@ public class TestGame extends SimpleApplication {
         WorldLoadListener listener = new MeshListener(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture, reg);// geomDeleteQueue);
         WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
 
-        world = new OffheapWorld(gen, reg, 30, listener);
+        //Has to be devidable by 16
+        world = new OffheapWorld(gen, reg, 80, listener);
         // mat = new Material(assetManager, "shaders/terra/voxel/NormalShader.j3md");
         //mat.setTexture("ColorMap", atlasTexture);
        // mat = new Material(assetManager, "/shaders/terra/splatter/SplatShader.j3md");
