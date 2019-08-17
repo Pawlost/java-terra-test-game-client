@@ -185,7 +185,7 @@ public class MeshListener implements WorldLoadListener {
             side.clear();
 
             // Place geometry in queue for main thread
-            geomCreateQueue.add(GeometryBatchFactory.optimize(node));
+            geomCreateQueue.add(node);
         }
     }
 
