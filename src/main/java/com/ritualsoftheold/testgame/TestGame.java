@@ -11,11 +11,11 @@ import com.jme3.texture.TextureArray;
 import com.ritualsoftheold.terra.core.material.TerraModule;
 import com.ritualsoftheold.terra.offheap.WorldGeneratorInterface;
 import com.ritualsoftheold.terra.core.material.Registry;
-import com.ritualsoftheold.terra.mesher.resource.TextureManager;
+import com.ritualsoftheold.testgame.generation.TextureManager;
 import com.ritualsoftheold.terra.offheap.world.OffheapLoadMarker;
 import com.ritualsoftheold.terra.offheap.world.OffheapWorld;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
-import com.ritualsoftheold.testgame.generation.MeshListener;
+import com.ritualsoftheold.testgame.generation.TestGameMesher;
 import com.ritualsoftheold.testgame.materials.PrimitiveResourcePack;
 import com.ritualsoftheold.testgame.utils.InputHandler;
 import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
@@ -85,7 +85,7 @@ public class TestGame extends SimpleApplication {
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-        WorldLoadListener listener = new MeshListener(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture, reg);// geomDeleteQueue);
+        WorldLoadListener listener = new TestGameMesher(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture, reg);// geomDeleteQueue);
         WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
 
         //Has to be devidable by 16

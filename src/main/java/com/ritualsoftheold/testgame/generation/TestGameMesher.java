@@ -2,12 +2,10 @@ package com.ritualsoftheold.testgame.generation;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
-import com.jme3.material.RenderState;
-import com.jme3.math.ColorRGBA;
 import com.jme3.scene.*;
-import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
 import com.jme3.util.BufferUtils;
+
 import com.ritualsoftheold.loader.ModelLoader3D;
 import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
 import com.ritualsoftheold.terra.core.material.Registry;
@@ -25,26 +23,25 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 
-public class MeshListener implements WorldLoadListener {
+public class TestGameMesher implements WorldLoadListener {
     private BlockingQueue<Spatial> geomCreateQueue;
-    private BlockingQueue<String>  geomDeleteQueue;
+    private BlockingQueue<String> geomDeleteQueue;
     private GreedyMesher greedyMesher;
     private ModelLoader3D modelLoader3D;
-    private AssetManager assetManager;
-    private TextureArray array;
     private Registry reg;
     private HashMap<Integer, Integer> unsualMeshSize;
+    private Material mat;
 
-    public MeshListener(AssetManager manager, BlockingQueue<Spatial> geomCreateQueue,
-                        BlockingQueue<String>  geomDeleteQueue, TextureArray array, Registry reg) {
-        this.array = array;
+    public TestGameMesher(AssetManager manager, BlockingQueue<Spatial> geomCreateQueue,
+                          BlockingQueue<String> geomDeleteQueue, TextureArray array, Registry reg) {
         this.geomCreateQueue = geomCreateQueue;
         this.geomDeleteQueue = geomDeleteQueue;
-        this.assetManager =  manager;
         this.reg = reg;
         greedyMesher = new GreedyMesher();
         modelLoader3D = new ModelLoader3D(manager);
         unsualMeshSize = new HashMap<>();
+        mat = new Material(manager, "shaders/terra/voxel/TerraArray.j3md");
+        mat.setTexture("ColorMap", array);
     }
 
     @Override
@@ -120,17 +117,14 @@ public class MeshListener implements WorldLoadListener {
 
             mesh.setBuffer(VertexBuffer.Type.TexCoord, 3, texCoordsBuffer);
 
-            mesh.updateBound();
+            Node node = new Node();
 
             Geometry geom = new Geometry("chunk:" + chunk.x + "," + chunk.y + "," + chunk.z, mesh);
             geom.setCullHint(Spatial.CullHint.Never);
-            Material mat = new Material(assetManager, "shaders/terra/voxel/TerraArray.j3md");
-            mat.setTexture("ColorMap", array);
             geom.setMaterial(mat);
+            geom.setLocalTranslation(chunk.x, chunk.y, chunk.z);
+            geom.updateModelBound();
 
-            geom.setLocalTranslation(chunk.x, chunk. y, chunk.z);
-
-            Node node = new Node();
             node.attachChild(geom);
 
             HashMap<Integer, Face> side = sector.get(6);
@@ -145,9 +139,9 @@ public class MeshListener implements WorldLoadListener {
                     int posY = (i - (4096 * posZ)) / 64;
                     int posX = i % 64;
                     object.position(
-                            (posX*0.25f) + chunk.x + (object.getMesh().getDefaultDistanceX() * 0.25f)/2f,
-                            (posY*0.25f) + chunk.y,
-                            (posZ*0.25f) + chunk.z + (object.getMesh().getDefaultDistanceZ() * 0.25f)/2f);
+                            (posX * 0.25f) + chunk.x + (object.getMesh().getDefaultDistanceX() * 0.25f) / 2f,
+                            (posY * 0.25f) + chunk.y,
+                            (posZ * 0.25f) + chunk.z + (object.getMesh().getDefaultDistanceZ() * 0.25f) / 2f);
                 } else {
                     int s = unsualMeshSize.get(id);
                     s += 1;
@@ -163,21 +157,41 @@ public class MeshListener implements WorldLoadListener {
                             unsualMeshSize.remove(objectId);
 
                             Spatial asset = modelLoader3D.getMesh(object.getMesh().getAsset());
-                            asset.setLocalTranslation(object.getX(), object.getY(), object.getZ());
-                            asset.setCullHint(Spatial.CullHint.Never);
 
-                            if (object.getTexture().hasTexture()) {
-                                Texture texture = modelLoader3D.getTexture(object.getTexture().getAsset());
-                                mat = new Material(assetManager, "shaders/transparency/TransparencyShader.j3md");
-                                mat.setTexture("ColorMap", texture);
-                                mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
-                            } else {
-                                mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-                                mat.setColor("Color", ColorRGBA.White);
+                            while (asset instanceof Node) {
+                                asset = ((Node) asset).getChild(0);
                             }
 
-                            asset.setMaterial(mat);
-                            node.attachChild(asset);
+                            Geometry assetGeom = (Geometry) asset;
+
+                            FloatBuffer normalBuffer = FloatBuffer.allocate(6 * assetGeom.getTriangleCount());
+
+                            for (int n = 0; n < normalBuffer.capacity(); n++) {
+                                normalBuffer.put(0);
+                            }
+
+                            texCoordsBuffer = BufferUtils.createFloatBuffer(
+                                    ((assetGeom.getMesh().getFloatBuffer(VertexBuffer.Type.TexCoord).capacity()
+                                            / 2) * 3));
+                            for (int t = 0; t < assetGeom.getMesh().getFloatBuffer(VertexBuffer.Type.TexCoord).capacity();
+                                 t += 2) {
+                                texCoordsBuffer.put(assetGeom.getMesh().getFloatBuffer(VertexBuffer.Type.TexCoord).get(t));
+                                texCoordsBuffer.put(assetGeom.getMesh().getFloatBuffer(VertexBuffer.Type.TexCoord).get(t + 1));
+                                texCoordsBuffer.put(object.getTexture().getPosition());
+                            }
+
+                            Mesh newMash = new Mesh();
+                            newMash.setBuffer(assetGeom.getMesh().getBuffer(VertexBuffer.Type.Position));
+                            newMash.setBuffer(assetGeom.getMesh().getBuffer(VertexBuffer.Type.Index));
+                            newMash.setBuffer(VertexBuffer.Type.TexCoord, 3, texCoordsBuffer);
+                            newMash.setBuffer(VertexBuffer.Type.Normal, 3, normalBuffer);
+
+                            assetGeom.setMesh(newMash);
+                            assetGeom.setLocalTranslation(object.getX(), object.getY(), object.getZ());
+                            assetGeom.setCullHint(Spatial.CullHint.Never);
+                            assetGeom.setMaterial(mat);
+                            assetGeom.updateModelBound();
+                            node.attachChild(assetGeom);
                         }
                     }
                 }
@@ -185,7 +199,7 @@ public class MeshListener implements WorldLoadListener {
             side.clear();
 
             // Place geometry in queue for main thread
-            geomCreateQueue.add(node);
+            geomCreateQueue.add(GeometryBatchFactory.optimize(node));
         }
     }
 
