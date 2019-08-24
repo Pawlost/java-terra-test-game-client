@@ -2,6 +2,7 @@ package com.ritualsoftheold.testgame.generation;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState;
 import com.jme3.scene.*;
 import com.jme3.texture.TextureArray;
 import com.jme3.util.BufferUtils;
@@ -42,6 +43,7 @@ public class TestGameMesher implements WorldLoadListener {
         unsualMeshSize = new HashMap<>();
         mat = new Material(manager, "shaders/terra/voxel/TerraArray.j3md");
         mat.setTexture("ColorMap", array);
+        mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
     }
 
     @Override
@@ -120,7 +122,6 @@ public class TestGameMesher implements WorldLoadListener {
             Node node = new Node();
 
             Geometry geom = new Geometry("chunk:" + chunk.x + "," + chunk.y + "," + chunk.z, mesh);
-            geom.setCullHint(Spatial.CullHint.Never);
             geom.setMaterial(mat);
             geom.setLocalTranslation(chunk.x, chunk.y, chunk.z);
             geom.updateModelBound();
@@ -188,7 +189,6 @@ public class TestGameMesher implements WorldLoadListener {
 
                             assetGeom.setMesh(newMash);
                             assetGeom.setLocalTranslation(object.getX(), object.getY(), object.getZ());
-                            assetGeom.setCullHint(Spatial.CullHint.Never);
                             assetGeom.setMaterial(mat);
                             assetGeom.updateModelBound();
                             node.attachChild(assetGeom);

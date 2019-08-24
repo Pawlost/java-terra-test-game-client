@@ -9,6 +9,7 @@ import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
 import com.ritualsoftheold.terra.core.material.TerraModule;
+import com.ritualsoftheold.terra.core.node.OctreeBase;
 import com.ritualsoftheold.terra.offheap.WorldGeneratorInterface;
 import com.ritualsoftheold.terra.core.material.Registry;
 import com.ritualsoftheold.testgame.generation.TextureManager;
@@ -21,6 +22,7 @@ import com.ritualsoftheold.testgame.utils.InputHandler;
 import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
 import com.ritualsoftheold.testgame.utils.Picker;
 
+import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -30,6 +32,7 @@ public class TestGame extends SimpleApplication {
     private BitmapText playerPosition;
     private Node terrain;
     private OffheapLoadMarker player;
+    private ArrayList<OctreeBase> node;
 
     private BlockingQueue<Spatial> geomCreateQueue = new ArrayBlockingQueue<>(10000);
     private BlockingQueue<String> geomDeleteQueue = new ArrayBlockingQueue<>(10000);
@@ -51,6 +54,7 @@ public class TestGame extends SimpleApplication {
 
         terrain = new Node("Terrain");
         rootNode.attachChild(terrain);
+        rootNode.setCullHint(Spatial.CullHint.Never);
 
         initUI();
         setupMaterials();
@@ -59,7 +63,7 @@ public class TestGame extends SimpleApplication {
 
 
         player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 10, 10, 0);
+                cam.getLocation().z, 16, 16, 0);
 
         Picker picker = new Picker(rootNode);
         //picker.setGeometry(custom);
@@ -70,7 +74,9 @@ public class TestGame extends SimpleApplication {
         InputHandler input = new InputHandler(inputManager, picker, rootNode, cam);
         // input.addMaterial(material);
 
-        new Thread(() -> world.initialChunkGeneration(player)).start();
+        node = new ArrayList<>(10000000);
+
+        new Thread(() -> world.initialChunkGeneration(player, node)).start();
     }
 
     private void setupMaterials() {

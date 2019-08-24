@@ -4,7 +4,6 @@ import com.jme3.asset.AssetManager;
 import com.jme3.texture.Image;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
-import com.jme3.texture.image.ColorSpace;
 import com.ritualsoftheold.loader.AssetIO;
 import com.ritualsoftheold.loader.ModelLoader3D;
 import com.ritualsoftheold.terra.core.material.Registry;
