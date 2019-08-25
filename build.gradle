@@ -1,9 +1,6 @@
 allprojects {
     // Apply the java plugin to add support for Java
     apply plugin: 'java'
-    apply plugin: 'eclipse'
-    apply plugin: 'maven-publish'
-
 
     sourceCompatibility = 12
     targetCompatibility = 12
@@ -13,14 +10,36 @@ allprojects {
         mavenLocal() // Mainly for snapshot Venom builds
         jcenter()
     }
+
     dependencies {
     // In this section you declare the dependencies for your production and test code
         compile 'org.slf4j:slf4j-api:1.7.26'
-        // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
         testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.26'
 
         testCompile("junit:junit:4.12")
         testRuntime("org.junit.vintage:junit-vintage-engine:5.4.0")
+    }
+}
+
+project(':Foreman:Weltschmerz:weltschmerz-environment') {
+    dependencies {
+        compile project(':Foreman:Weltschmerz:weltschmerz-misc')
+    }
+}
+
+
+project(':Foreman:Weltschmerz:weltschmerz-core') {
+    dependencies {
+        compile project(':Foreman:Weltschmerz:weltschmerz-environment')
+        compile project(':Foreman:Weltschmerz:weltschmerz-misc')
+    }
+}
+
+
+project(':Foreman') {
+    dependencies {
+        compile project(':Foreman:Weltschmerz:weltschmerz-core')
+        compile project(':Foreman:Weltschmerz:weltschmerz-misc')
     }
 }
 
@@ -32,7 +51,6 @@ project(':Terra:terra-offheap') {
         exclude '**/*'
     }
 }
-
 
 project(':Terra:terra-meshgen') {
     dependencies {
@@ -51,63 +69,19 @@ project(':Terra:terra-core') {
     }
 }
 
-project(':Weltschmerz:weltschmerz-environment') {
-    dependencies {
-        compile project(':Weltschmerz:weltschmerz-misc')
-    }
-}
-
-project(':Weltschmerz:weltschmerz-core') {
-    dependencies {
-        compile project(':Weltschmerz:weltschmerz-environment')
-        compile project(':Weltschmerz:weltschmerz-misc')
-    }
-}
-
-project(':Weltschmerz:heightmap-generator') {
-    dependencies {
-        compile project(':Weltschmerz:weltschmerz-core')
-        compile project(':Weltschmerz:weltschmerz-environment')
-        compile project(':Weltschmerz:weltschmerz-misc')
-    }
-}
-
-
-configurations {
-    junion
-}
-
 dependencies {
     compile project(':Terra:terra-core')
     compile project(':Terra:terra-offheap')
     compile project(':Terra:terra-meshgen')
     compile project(':Terra:terra-io-files')
-    compile project(':Weltschmerz:weltschmerz-core')
-    compile project(':Weltschmerz:heightmap-generator')
     compile project(':3D-model-loader')
+    compile project(':Foreman')
     compile project(':Skybox')
 
     compile 'org.jmonkeyengine:jme3-desktop:3.2.2-stable'
     compile 'org.jmonkeyengine:jme3-lwjgl3:3.2.2-stable'
-    compile files('libs/junion1.2.2.jar')
-    junion files('libs/junionc1.2.2.jar')
-}
-task junionTask(type: JavaExec) {
-    doLast{
-        classpath configurations.junion
-        classpath += sourceSets.main.runtimeClasspath
-        main = 'theleo.jstruct.plugin.SourceCompiler'
-        args = ['-classpath', sourceSets.main.runtimeClasspath.getAsPath(),
-                '-version', '12',
-                '-sourcepath', files(sourceSets.main.java.srcDirs).getAsPath(),
-                '-outputpath', file('build/generated').getPath()
-        ]
-        sourceSets.main.java.srcDirs = ['build/generated']
-    }
-
 }
 
-build.dependsOn junionTask
 test {
     exclude '**/*'
 }

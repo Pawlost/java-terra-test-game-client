@@ -9,3 +9,6 @@
 *.fbx
 **/models/
 **/textures/
+
+#Misc
+/libs/

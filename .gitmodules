@@ -16,3 +16,6 @@
 [submodule "Skybox"]
 	path = Skybox
 	url = https://github.com/starandserpent/Skybox.git
+[submodule "Foreman"]
+	path = Foreman
+	url = git@github.com:starandserpent/Foreman.git
