@@ -3,6 +3,7 @@
 /.gradle/
 **/build/
 **/out/
+**/classes/
 *.log
 
 #Private assets

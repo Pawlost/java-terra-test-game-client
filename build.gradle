@@ -7,81 +7,18 @@ allprojects {
 
     // In this section you declare where to find the dependencies of your project
     repositories {
-        mavenLocal() // Mainly for snapshot Venom builds
+        mavenCentral()
         jcenter()
     }
 
-    dependencies {
-    // In this section you declare the dependencies for your production and test code
-        compile 'org.slf4j:slf4j-api:1.7.26'
-        testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.26'
-
-        testCompile("junit:junit:4.12")
-        testRuntime("org.junit.vintage:junit-vintage-engine:5.4.0")
-    }
+    dependencies {}
 }
 
-project(':Foreman:Weltschmerz:weltschmerz-environment') {
-    dependencies {
-        compile project(':Foreman:Weltschmerz:weltschmerz-misc')
-    }
-}
-
-
-project(':Foreman:Weltschmerz:weltschmerz-core') {
-    dependencies {
-        compile project(':Foreman:Weltschmerz:weltschmerz-environment')
-        compile project(':Foreman:Weltschmerz:weltschmerz-misc')
-    }
-}
-
-
-project(':Foreman') {
-    dependencies {
-        compile project(':Foreman:Weltschmerz:weltschmerz-core')
-        compile project(':Foreman:Weltschmerz:weltschmerz-misc')
-    }
-}
-
-project(':Terra:terra-offheap') {
-    dependencies {
-        compile project(':Terra:terra-core')
-    }
-    test {
-        exclude '**/*'
-    }
-}
-
-project(':Terra:terra-meshgen') {
-    dependencies {
-        compile project(':Terra:terra-offheap')
-        compile project(':Terra:terra-core')
-        compile project(':Terra:terra-io-files')
-    }
-    test {
-        exclude '**/*'
-    }
-}
-
-project(':Terra:terra-core') {
-    test {
-        exclude '**/*'
-    }
-}
 
 dependencies {
-    compile project(':Terra:terra-core')
-    compile project(':Terra:terra-offheap')
-    compile project(':Terra:terra-meshgen')
-    compile project(':Terra:terra-io-files')
     compile project(':3D-model-loader')
-    compile project(':Foreman')
     compile project(':Skybox')
 
     compile 'org.jmonkeyengine:jme3-desktop:3.2.2-stable'
     compile 'org.jmonkeyengine:jme3-lwjgl3:3.2.2-stable'
-}
-
-test {
-    exclude '**/*'
 }

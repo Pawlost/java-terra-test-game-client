@@ -1,13 +1,5 @@
-apply from: 'Terra/settings.gradle'
-apply from: 'Foreman/settings.gradle'
-apply from: 'Foreman/Weltschmerz/settings.gradle'
-
 rootProject.name = 'TestGameClient'
 
-include ':Terra:terra-core', ':Terra:terra-offheap', ':Terra:terra-meshgen', ':Terra:terra-io-files'
-include ':Foreman:Weltschemrz', ':Foreman:Weltschmerz:weltschmerz-core', ':Foreman:Weltschmerz:weltschmerz-misc',
-        ':Foreman:Weltschmerz:weltschmerz-environment'
 include '3D-model-loader'
-include 'Foreman'
 include 'Skybox'
 

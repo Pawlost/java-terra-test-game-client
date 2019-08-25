@@ -1,21 +1,6 @@
-[submodule "Terra"]
-	path = Terra
-	url = git@github.com:starandserpent/Terra.git
-[submodule "Weltschmerz"]
-	path = Weltschmerz
-	url = git@github.com:starandserpent/Weltschmerz.git
-[submodule "Exorcism"]
-	path = Exorcism
-	url = https://github.com/starandserpent/Exorcism
-[submodule "Heisenberg"]
-	path = Heisenberg
-	url = https://github.com/starandserpent/Heisenberg.git
 [submodule "3D-model-loader"]
 	path = 3D-model-loader
 	url = https://github.com/starandserpent/3D-model-loader
-[submodule "Skybox"]
-	path = Skybox
-	url = https://github.com/starandserpent/Skybox.git
-[submodule "Foreman"]
-	path = Foreman
-	url = git@github.com:starandserpent/Foreman.git
+[submodule "TerraClient"]
+	path = TerraClient
+	url = git@github.com:starandserpent/TerraClient.git
