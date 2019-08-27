@@ -1,4 +1,4 @@
-package com.ritualsoftheold.testgame.generation;
+package com.ritualsoftheold.testgame.client.generation;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -8,13 +8,11 @@ import com.jme3.texture.TextureArray;
 import com.jme3.util.BufferUtils;
 
 import com.ritualsoftheold.loader.ModelLoader3D;
-import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
-import com.ritualsoftheold.terra.core.material.Registry;
-import com.ritualsoftheold.terra.core.material.TerraObject;
-import com.ritualsoftheold.terra.mesher.Face;
-import com.ritualsoftheold.terra.mesher.GreedyMesher;
-import com.ritualsoftheold.terra.offheap.chunk.ChunkLArray;
-import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
+import com.ritualsoftheold.terra.core.chunk.ChunkLArray;
+import com.ritualsoftheold.terra.core.materials.Registry;
+import com.ritualsoftheold.terra.core.materials.TerraObject;
+import com.ritualsoftheold.terra.client.mesher.Face;
+import com.ritualsoftheold.terra.client.mesher.GreedyMesher;
 import jme3tools.optimize.GeometryBatchFactory;
 
 import java.nio.FloatBuffer;
@@ -24,7 +22,7 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 
-public class TestGameMesher implements WorldLoadListener {
+public class TestGameMesher {
     private BlockingQueue<Spatial> geomCreateQueue;
     private BlockingQueue<String> geomDeleteQueue;
     private GreedyMesher greedyMesher;
@@ -46,12 +44,6 @@ public class TestGameMesher implements WorldLoadListener {
         mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
     }
 
-    @Override
-    public void octreeLoaded(long addr, long groupAddr, int id, float x, float y, float z, float scale, LoadMarker trigger) {
-        // For now, just ignore octrees
-    }
-
-    @Override
     public void chunkLoaded(ChunkLArray chunk) {
 
         int verticeIndex = 0;
@@ -203,7 +195,6 @@ public class TestGameMesher implements WorldLoadListener {
         }
     }
 
-    @Override
     public void chunkUnloaded(ChunkLArray chunk) {
         float x = chunk.x;
         float y = chunk.y;

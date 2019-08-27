@@ -1,13 +1,13 @@
-package com.ritualsoftheold.testgame.materials;
+package com.ritualsoftheold.testgame.client.materials;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Spatial;
 import com.ritualsoftheold.loader.BlockMaker;
 import com.ritualsoftheold.loader.ModelLoader3D;
-import com.ritualsoftheold.terra.core.material.TerraMesh;
-import com.ritualsoftheold.terra.core.material.TerraModule;
-import com.ritualsoftheold.terra.core.material.Registry;
-import com.ritualsoftheold.terra.core.material.TerraTexture;
+import com.ritualsoftheold.terra.core.materials.Registry;
+import com.ritualsoftheold.terra.core.materials.TerraMesh;
+import com.ritualsoftheold.terra.core.materials.TerraModule;
+import com.ritualsoftheold.terra.core.materials.TerraTexture;
 
 public class PrimitiveResourcePack {
     private Registry reg;

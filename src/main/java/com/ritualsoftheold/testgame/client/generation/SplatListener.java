@@ -1,4 +1,4 @@
-package com.ritualsoftheold.testgame.generation;
+package com.ritualsoftheold.testgame.client.generation;
 
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -9,15 +9,13 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
-import com.ritualsoftheold.terra.core.gen.objects.LoadMarker;
-import com.ritualsoftheold.terra.mesher.SplatMesher;
-import com.ritualsoftheold.terra.offheap.chunk.ChunkLArray;
-import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
+import com.ritualsoftheold.terra.core.chunk.ChunkLArray;
+import com.ritualsoftheold.terra.client.mesher.SplatMesher;
 
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 
-public class SplatListener implements WorldLoadListener {
+public class SplatListener {
     private SplatMesher mesher;
     private Material mat;
     private BlockingQueue<Geometry> geomCreateQueue;
@@ -29,12 +27,6 @@ public class SplatListener implements WorldLoadListener {
         this.geomCreateQueue = geomCreateQueue;
     }
 
-    @Override
-    public void octreeLoaded(long addr, long groupAddr, int id, float x, float y, float z, float scale, LoadMarker trigger) {
-        // For now, just ignore octrees
-    }
-
-    @Override
     public void chunkLoaded(ChunkLArray chunk) {
         //System.out.println("Loaded chunk: " + chunk.memoryAddress());
         ArrayList<Vector3f> vector3fsArray = new ArrayList<>();
@@ -73,7 +65,6 @@ public class SplatListener implements WorldLoadListener {
         geomCreateQueue.add(geom);
     }
 
-    @Override
     public void chunkUnloaded(ChunkLArray chunk) {
         float x = chunk.x;
         float y = chunk.y;

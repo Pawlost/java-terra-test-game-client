@@ -1,11 +1,11 @@
-package com.ritualsoftheold.testgame.utils;
+package com.ritualsoftheold.testgame.client.utils;
 
 import com.jme3.collision.CollisionResults;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.ritualsoftheold.terra.core.material.TerraObject;
+import com.ritualsoftheold.terra.core.materials.TerraObject;
 
 public class Picker {
     private Vector3f collision;

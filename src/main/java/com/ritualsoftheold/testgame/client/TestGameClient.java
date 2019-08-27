@@ -1,4 +1,4 @@
-package com.ritualsoftheold.testgame;
+package com.ritualsoftheold.testgame.client;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
@@ -8,27 +8,24 @@ import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
-import com.ritualsoftheold.terra.core.material.TerraModule;
-import com.ritualsoftheold.terra.core.node.OctreeBase;
-import com.ritualsoftheold.terra.offheap.WorldGeneratorInterface;
-import com.ritualsoftheold.terra.core.material.Registry;
-import com.ritualsoftheold.testgame.generation.TextureManager;
-import com.ritualsoftheold.terra.offheap.world.OffheapLoadMarker;
-import com.ritualsoftheold.terra.offheap.world.OffheapWorld;
-import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
-import com.ritualsoftheold.testgame.generation.TestGameMesher;
-import com.ritualsoftheold.testgame.materials.PrimitiveResourcePack;
-import com.ritualsoftheold.testgame.utils.InputHandler;
-import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
-import com.ritualsoftheold.testgame.utils.Picker;
+import com.ritualsoftheold.terra.core.materials.Registry;
+import com.ritualsoftheold.terra.core.materials.TerraModule;
+import com.ritualsoftheold.terra.core.octrees.OctreeBase;
+import com.ritualsoftheold.terra.server.manager.WorldGeneratorInterface;
+import com.ritualsoftheold.terra.server.manager.world.OffheapLoadMarker;
+import com.ritualsoftheold.testgame.client.generation.TestGameMesher;
+import com.ritualsoftheold.testgame.client.materials.PrimitiveResourcePack;
+import com.ritualsoftheold.testgame.client.utils.InputHandler;
+import com.ritualsoftheold.testgame.client.utils.Picker;
+import com.ritualsoftheold.testgame.client.generation.TextureManager;
+import com.ritualsoftheold.testgame.server.generation.WeltschmerzWorldGenerator;
 
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class TestGame extends SimpleApplication {
+public class TestGameClient extends SimpleApplication {
 
-    private OffheapWorld world;
     private BitmapText playerPosition;
     private Node terrain;
     private OffheapLoadMarker player;
@@ -38,7 +35,7 @@ public class TestGame extends SimpleApplication {
     private BlockingQueue<String> geomDeleteQueue = new ArrayBlockingQueue<>(10000);
 
     public static void main(String... args) {
-        TestGame app = new TestGame();
+        TestGameClient app = new TestGameClient();
         app.showSettings = false;
         app.settings = new AppSettings(true);
         app.settings.setResolution(1200, 500);
@@ -75,8 +72,6 @@ public class TestGame extends SimpleApplication {
         // input.addMaterial(material);
 
         node = new ArrayList<>(10000000);
-
-        new Thread(() -> world.initialChunkGeneration(player, node)).start();
     }
 
     private void setupMaterials() {
@@ -91,15 +86,8 @@ public class TestGame extends SimpleApplication {
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-        WorldLoadListener listener = new TestGameMesher(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture, reg);// geomDeleteQueue);
+        TestGameMesher listener = new TestGameMesher(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture, reg);// geomDeleteQueue);
         WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
-
-        //Has to be devidable by 16
-        world = new OffheapWorld(gen, reg, 80, listener);
-        // mat = new Material(assetManager, "shaders/terra/voxel/NormalShader.j3md");
-        //mat.setTexture("ColorMap", atlasTexture);
-       // mat = new Material(assetManager, "/shaders/terra/splatter/SplatShader.j3md");
-       // mat.setFloat("VoxelSize", DataConstants.SMALLEST_BLOCK);
     }
 
     @Override

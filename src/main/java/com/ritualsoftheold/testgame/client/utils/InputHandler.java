@@ -1,7 +1,6 @@
-package com.ritualsoftheold.testgame.utils;
+package com.ritualsoftheold.testgame.client.utils;
 
 import com.jme3.collision.CollisionResults;
-import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -12,7 +11,6 @@ import com.jme3.material.Material;
 import com.jme3.math.Ray;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
-import com.ritualsoftheold.testgame.utils.Picker;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.ritualsoftheold.testgame.generation;
+package com.ritualsoftheold.testgame.client.generation;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.texture.Image;
@@ -6,8 +6,8 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
 import com.ritualsoftheold.loader.AssetIO;
 import com.ritualsoftheold.loader.ModelLoader3D;
-import com.ritualsoftheold.terra.core.material.Registry;
-import com.ritualsoftheold.terra.core.material.TerraObject;
+import com.ritualsoftheold.terra.core.materials.Registry;
+import com.ritualsoftheold.terra.core.materials.TerraObject;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
