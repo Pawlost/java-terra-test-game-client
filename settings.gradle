@@ -1,4 +1,3 @@
-apply from: 'terra-test-game-server/settings.gradle'
 apply from: 'TerraClient/settings.gradle'
 
 rootProject.name = 'TestGameClient'

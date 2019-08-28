@@ -20,23 +20,7 @@ project(':TerraClient:terra-meshgen'){
     }
 }
 
-project('terra-test-game-server'){
-    dependencies{
-        compile project(':terra-test-game-server:TerraServer:terra-server-manager')
-        compile project(':terra-test-game-server:TerraServer:Foreman')
-        compile project(':terra-test-game-server:TerraServer:Foreman:TerraCore')
-    }
-}
-
-project('terra-test-game-server:TerraServer:terra-server-manager'){
-    dependencies{
-        compile project(':terra-test-game-server:TerraServer:Foreman')
-        compile project(':terra-test-game-server:TerraServer:Foreman:TerraCore')
-    }
-}
-
 dependencies {
-    compile project('terra-test-game-server')
     compile project(':3D-model-loader')
     compile project(':Skybox')
     compile project(':TerraClient:TerraCore')

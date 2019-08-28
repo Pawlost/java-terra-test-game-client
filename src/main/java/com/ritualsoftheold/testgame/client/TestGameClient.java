@@ -6,42 +6,47 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
+
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
+import com.ritualsoftheold.terra.core.chunk.ChunkLArray;
 import com.ritualsoftheold.terra.core.materials.Registry;
-import com.ritualsoftheold.terra.core.materials.TerraModule;
 import com.ritualsoftheold.terra.core.octrees.OctreeBase;
-import com.ritualsoftheold.terra.server.manager.WorldGeneratorInterface;
-import com.ritualsoftheold.terra.server.manager.world.OffheapLoadMarker;
 import com.ritualsoftheold.testgame.client.generation.TestGameMesher;
-import com.ritualsoftheold.testgame.client.materials.PrimitiveResourcePack;
+import com.ritualsoftheold.testgame.client.generation.TextureManager;
+import com.ritualsoftheold.testgame.client.network.Client;
+import com.ritualsoftheold.testgame.client.network.Server;
 import com.ritualsoftheold.testgame.client.utils.InputHandler;
 import com.ritualsoftheold.testgame.client.utils.Picker;
-import com.ritualsoftheold.testgame.client.generation.TextureManager;
-import com.ritualsoftheold.testgame.server.generation.WeltschmerzWorldGenerator;
 
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class TestGameClient extends SimpleApplication {
+public class TestGameClient extends SimpleApplication implements Client {
 
     private BitmapText playerPosition;
     private Node terrain;
-    private OffheapLoadMarker player;
-    private ArrayList<OctreeBase> node;
+    private Server server;
+    private TestGameMesher mesher;
+    private TextureManager texManager;
+    private Registry registry;
 
     private BlockingQueue<Spatial> geomCreateQueue = new ArrayBlockingQueue<>(10000);
     private BlockingQueue<String> geomDeleteQueue = new ArrayBlockingQueue<>(10000);
 
-    public static void main(String... args) {
-        TestGameClient app = new TestGameClient();
-        app.showSettings = false;
-        app.settings = new AppSettings(true);
-        app.settings.setResolution(1200, 500);
-        app.settings.setTitle("Terra testgame");
-        app.settings.setFullscreen(false);
-        app.start();
+    private ArrayList<OctreeBase> octrees;
+
+    public TestGameClient(Server server, Registry registry){
+        super();
+        this.server = server;
+        this.registry = registry;
+        this.showSettings = false;
+        this.settings = new AppSettings(true);
+        this.settings.setResolution(1200, 500);
+        this.settings.setTitle("Terra testgame client");
+        this.settings.setFullscreen(false);
+        this.start();
     }
 
     @Override
@@ -53,14 +58,10 @@ public class TestGameClient extends SimpleApplication {
         rootNode.attachChild(terrain);
         rootNode.setCullHint(Spatial.CullHint.Never);
 
+        initTextures();
         initUI();
-        setupMaterials();
 
         cam.setLocation(new Vector3f(0, 0, 50));
-
-
-        player = world.createLoadMarker(cam.getLocation().x, cam.getLocation().y,
-                cam.getLocation().z, 16, 16, 0);
 
         Picker picker = new Picker(rootNode);
         //picker.setGeometry(custom);
@@ -70,24 +71,18 @@ public class TestGameClient extends SimpleApplication {
 
         InputHandler input = new InputHandler(inputManager, picker, rootNode, cam);
         // input.addMaterial(material);
-
-        node = new ArrayList<>(10000000);
+        octrees = server.init(this);
     }
 
-    private void setupMaterials() {
-        TerraModule mod = new TerraModule("testgame");
-        Registry reg = new Registry();
-        PrimitiveResourcePack resourcePack = new PrimitiveResourcePack(reg);
-        resourcePack.registerObjects(mod, assetManager);
+    private void initTextures(){
+        texManager = new TextureManager(assetManager, registry);
 
-        TextureManager texManager = new TextureManager(assetManager, reg);
         TextureArray atlasTexture = texManager.getTextureArray();
         atlasTexture.setWrap(Texture.WrapMode.Repeat);
         atlasTexture.setMagFilter(Texture.MagFilter.Nearest);
         atlasTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
 
-        TestGameMesher listener = new TestGameMesher(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture, reg);// geomDeleteQueue);
-        WorldGeneratorInterface gen = new WeltschmerzWorldGenerator().setup(reg, mod);
+        mesher = new TestGameMesher(assetManager, geomCreateQueue, geomDeleteQueue, atlasTexture, registry);
     }
 
     @Override
@@ -95,30 +90,6 @@ public class TestGameClient extends SimpleApplication {
 
         playerPosition.setText("Player position x: " + cam.getLocation().x + " y: " +
                 cam.getLocation().y + " z: " + cam.getLocation().z);
-        int camX = (int) (cam.getLocation().x / 16f) * 16;
-        int playerX = (int) (player.getX() / 16f) * 16;
-        int camZ = (int) (cam.getLocation().z / 16f) * 16;
-        int playerZ = (int) (player.getZ() / 16f) * 16;
-
-        if (geomCreateQueue.isEmpty() && !player.hasMoved() && geomDeleteQueue.isEmpty()) {
-            if (camX != playerX || camZ != playerZ) {
-
-                if (camX > playerX) {
-                    playerX += 16;
-                } else if (camX < playerX) {
-                    playerX -= 16;
-                }
-
-                if (camZ > playerZ) {
-                    playerZ += 16;
-                } else if (camZ < playerZ) {
-                    playerZ -= 16;
-                }
-
-                player.move(playerX, (int) cam.getLocation().y, playerZ);
-              //  new Thread(() -> world.updateLoadMarker(player, false)).start();
-            }
-        }
 
         while (!geomCreateQueue.isEmpty()) {
             Spatial geom = geomCreateQueue.poll();
@@ -152,5 +123,25 @@ public class TestGameClient extends SimpleApplication {
         playerPosition.setSize(guiFont.getCharSet().getRenderedSize());
         playerPosition.setLocalTranslation(0, (settings.getHeight() / 4f) * 3, 0);
         guiNode.attachChild(playerPosition);
+    }
+
+    @Override
+    public float getPosX() {
+        return cam.getLocation().x;
+    }
+
+    @Override
+    public float getPosY() {
+        return cam.getLocation().y;
+    }
+
+    @Override
+    public float getPosZ() {
+        return cam.getLocation().z;
+    }
+
+    @Override
+    public void sendChunk(ChunkLArray chunk) {
+        mesher.chunkLoaded(chunk);
     }
 }

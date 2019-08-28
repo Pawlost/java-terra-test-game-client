@@ -4,6 +4,3 @@
 [submodule "TerraClient"]
 	path = TerraClient
 	url = git@github.com:starandserpent/TerraClient.git
-[submodule "terra-test-game-server"]
-	path = terra-test-game-server
-	url = git@github.com:starandserpent/terra-test-game-server.git
