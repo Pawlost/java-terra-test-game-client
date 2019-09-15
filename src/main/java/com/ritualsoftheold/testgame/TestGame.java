@@ -1,8 +1,13 @@
 package com.ritualsoftheold.testgame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.plugins.ZipLocator;
 import com.jme3.font.BitmapText;
+import com.jme3.light.AmbientLight;
+import com.jme3.light.DirectionalLight;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
@@ -17,6 +22,7 @@ import com.ritualsoftheold.terra.offheap.world.OffheapLoadMarker;
 import com.ritualsoftheold.terra.offheap.world.OffheapWorld;
 import com.ritualsoftheold.terra.offheap.world.WorldLoadListener;
 import com.ritualsoftheold.testgame.generation.TestGameMesher;
+import com.ritualsoftheold.testgame.materials.BarrelDistortion;
 import com.ritualsoftheold.testgame.materials.PrimitiveResourcePack;
 import com.ritualsoftheold.testgame.utils.InputHandler;
 import com.ritualsoftheold.testgame.generation.WeltschmerzWorldGenerator;
@@ -37,6 +43,9 @@ public class TestGame extends SimpleApplication {
     private BlockingQueue<Spatial> geomCreateQueue = new ArrayBlockingQueue<>(10000);
     private BlockingQueue<String> geomDeleteQueue = new ArrayBlockingQueue<>(10000);
 
+    private FilterPostProcessor fpp;
+    private BarrelDistortion barrel;
+
     public static void main(String... args) {
         TestGame app = new TestGame();
         app.showSettings = false;
@@ -55,6 +64,13 @@ public class TestGame extends SimpleApplication {
         terrain = new Node("Terrain");
         rootNode.attachChild(terrain);
         rootNode.setCullHint(Spatial.CullHint.Never);
+
+        assetManager.registerLocator("D:\\Documents\\Programming\\Java Projects\\terra-test-game-client\\src\\main\\resources\\scenes\\town.zip", ZipLocator.class);
+        var sceneModel = assetManager.loadModel("main.scene");
+        sceneModel.setLocalScale(2f);
+        sceneModel.setLocalTranslation(0,0,0);
+        rootNode.attachChild(sceneModel);
+        setUpLight();
 
         initUI();
         setupMaterials();
@@ -76,7 +92,22 @@ public class TestGame extends SimpleApplication {
 
         node = new ArrayList<>(10000000);
 
+        fpp = new FilterPostProcessor(assetManager);
+        barrel = new BarrelDistortion();
+        fpp.addFilter(barrel);
+        viewPort.addProcessor(fpp);
         new Thread(() -> world.initialChunkGeneration(player, node)).start();
+    }
+    private void setUpLight() {
+        // We add light so we see the scene
+        AmbientLight al = new AmbientLight();
+        al.setColor(ColorRGBA.White.mult(1.3f));
+        rootNode.addLight(al);
+
+        DirectionalLight dl = new DirectionalLight();
+        dl.setColor(ColorRGBA.White);
+        dl.setDirection(new Vector3f(2.8f, -2.8f, -2.8f).normalizeLocal());
+        rootNode.addLight(dl);
     }
 
     private void setupMaterials() {
