@@ -113,9 +113,9 @@ public class TestGameMesher {
 
             Node node = new Node();
 
-            Geometry geom = new Geometry("chunk:" + chunk.x + "," + chunk.y + "," + chunk.z, mesh);
+            Geometry geom = new Geometry("chunk:" + chunk.getPosX() + "," + chunk.getPosY() + "," + chunk.getPosZ(), mesh);
             geom.setMaterial(mat);
-            geom.setLocalTranslation(chunk.x, chunk.y, chunk.z);
+            geom.setLocalTranslation(chunk.getPosX(), chunk.getPosY(), chunk.getPosZ());
             geom.updateModelBound();
 
             node.attachChild(geom);
@@ -132,9 +132,9 @@ public class TestGameMesher {
                     int posY = (i - (4096 * posZ)) / 64;
                     int posX = i % 64;
                     object.position(
-                            (posX * 0.25f) + chunk.x + (object.getMesh().getDefaultDistanceX() * 0.25f) / 2f,
-                            (posY * 0.25f) + chunk.y,
-                            (posZ * 0.25f) + chunk.z + (object.getMesh().getDefaultDistanceZ() * 0.25f) / 2f);
+                            (posX * 0.25f) + chunk.getPosX() + (object.getMesh().getDefaultDistanceX() * 0.25f) / 2f,
+                            (posY * 0.25f) + chunk.getPosY(),
+                            (posZ * 0.25f) + chunk.getPosZ() + (object.getMesh().getDefaultDistanceZ() * 0.25f) / 2f);
                 } else {
                     int s = unsualMeshSize.get(id);
                     s += 1;
@@ -196,9 +196,9 @@ public class TestGameMesher {
     }
 
     public void chunkUnloaded(ChunkLArray chunk) {
-        float x = chunk.x;
-        float y = chunk.y;
-        float z = chunk.z;
+        float x = chunk.getPosX();
+        float y = chunk.getPosY();
+        float z = chunk.getPosZ();
 
         // Create geometry
         String name = "chunk:" + x + "," + y + "," + z;

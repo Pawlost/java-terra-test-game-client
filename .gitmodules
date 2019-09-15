@@ -1,6 +1,3 @@
-[submodule "3D-model-loader"]
-	path = 3D-model-loader
-	url = https://github.com/starandserpent/3D-model-loader
 [submodule "TerraClient"]
 	path = TerraClient
 	url = git@github.com:starandserpent/TerraClient.git

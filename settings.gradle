@@ -2,9 +2,5 @@ apply from: 'TerraClient/settings.gradle'
 
 rootProject.name = 'TestGameClient'
 
-include '3D-model-loader'
-include 'Skybox'
-include 'TerraClient:TerraCore', 'TerraClient:terra-meshgen'
-//include 'terra-test-game-server', 'terra-test-game-server:TerraServer',
-  //      'terra-test-game-server:TerraServer:terra-server-manager', 'terra-test-game-server:TerraServer:Foreman',
-    //    'terra-test-game-server:TerraServer:Foreman:TerraCore'
+include ':TerraClient:TerraCore:3D-model-loader',
+        'TerraClient:TerraCore', 'TerraClient:terra-meshgen'

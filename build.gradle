@@ -20,9 +20,14 @@ project(':TerraClient:terra-meshgen'){
     }
 }
 
+project(':TerraClient:TerraCore') {
+    dependencies{
+        compile project(':TerraClient:TerraCore:3D-model-loader')
+    }
+}
+
 dependencies {
-    compile project(':3D-model-loader')
-    compile project(':Skybox')
+    compile project(':TerraClient:TerraCore:3D-model-loader')
     compile project(':TerraClient:TerraCore')
     compile project(':TerraClient:terra-meshgen')
 

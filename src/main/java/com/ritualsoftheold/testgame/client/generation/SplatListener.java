@@ -51,14 +51,14 @@ public class SplatListener {
         mesh.updateBound();
 
         // Create geometry
-        Geometry geom = new Geometry("chunk:" + chunk.x + "," + chunk.y + "," + chunk.z, mesh);
+        Geometry geom = new Geometry("chunk:" + chunk.getPosX() + "," + chunk.getPosY() + "," + chunk.getPosZ(), mesh);
 
         // Create material
         geom.setMaterial(mat);
 
         //Set chunk position in world
         geom.setShadowMode(RenderQueue.ShadowMode.Cast);
-        geom.setLocalTranslation(chunk.x, chunk.y, chunk.z);
+        geom.setLocalTranslation(chunk.getPosX(), chunk.getPosY(), chunk.getPosX());
         geom.setCullHint(Spatial.CullHint.Never);
 
         // Place geometry in queue for main thread
@@ -66,9 +66,9 @@ public class SplatListener {
     }
 
     public void chunkUnloaded(ChunkLArray chunk) {
-        float x = chunk.x;
-        float y = chunk.y;
-        float z = chunk.z;
+        float x = chunk.getPosX();
+        float y = chunk.getPosY();
+        float z = chunk.getPosZ();
 
         // Create geometry
         String name = "chunk:" + x + "," + y + "," + z;
