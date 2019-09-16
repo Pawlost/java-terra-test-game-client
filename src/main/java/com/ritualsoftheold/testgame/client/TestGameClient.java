@@ -9,8 +9,10 @@ import com.jme3.system.AppSettings;
 
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
+import com.ritualsoftheold.loader.config.PrimitiveResourcePack;
 import com.ritualsoftheold.terra.core.chunk.ChunkLArray;
 import com.ritualsoftheold.terra.core.materials.Registry;
+import com.ritualsoftheold.terra.core.materials.TerraModule;
 import com.ritualsoftheold.terra.core.octrees.OctreeBase;
 import com.ritualsoftheold.testgame.client.generation.TestGameMesher;
 import com.ritualsoftheold.testgame.client.generation.TextureManager;
@@ -37,10 +39,9 @@ public class TestGameClient extends SimpleApplication implements Client {
 
     private ArrayList<OctreeBase> octrees;
 
-    public TestGameClient(Server server, Registry registry){
+    public TestGameClient(Server server){
         super();
         this.server = server;
-        this.registry = registry;
         this.showSettings = false;
         this.settings = new AppSettings(true);
         this.settings.setResolution(1200, 500);
@@ -57,6 +58,12 @@ public class TestGameClient extends SimpleApplication implements Client {
         terrain = new Node("Terrain");
         rootNode.attachChild(terrain);
         rootNode.setCullHint(Spatial.CullHint.Never);
+
+        registry = new Registry();
+        TerraModule mod = new TerraModule("testgame");
+        PrimitiveResourcePack resourcePack = new PrimitiveResourcePack(assetManager);
+        resourcePack.registerObjects(mod);
+        mod.registerMaterials(registry);
 
         initTextures();
         initUI();
