@@ -2,7 +2,11 @@ package com.ritualsoftheold.testgame.client;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
+import com.jme3.light.AmbientLight;
+import com.jme3.light.DirectionalLight;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
@@ -20,6 +24,7 @@ import com.ritualsoftheold.testgame.client.network.Client;
 import com.ritualsoftheold.testgame.client.network.Server;
 import com.ritualsoftheold.testgame.client.utils.InputHandler;
 import com.ritualsoftheold.testgame.client.utils.Picker;
+import com.ritualsoftheold.testgame.materials.BarrelDistortion;
 
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -33,6 +38,9 @@ public class TestGameClient extends SimpleApplication implements Client {
     private TestGameMesher mesher;
     private TextureManager texManager;
     private Registry registry;
+
+    private FilterPostProcessor fpp;
+    private BarrelDistortion barrel;
 
     private BlockingQueue<Spatial> geomCreateQueue = new ArrayBlockingQueue<>(10000);
     private BlockingQueue<String> geomDeleteQueue = new ArrayBlockingQueue<>(10000);
@@ -79,6 +87,13 @@ public class TestGameClient extends SimpleApplication implements Client {
         InputHandler input = new InputHandler(inputManager, picker, rootNode, cam);
         // input.addMaterial(material);
         octrees = server.init(this);
+
+        setUpLight();
+
+        fpp = new FilterPostProcessor(assetManager);
+        barrel = new BarrelDistortion();
+        fpp.addFilter(barrel);
+        viewPort.addProcessor(fpp);
     }
 
     private void initTextures(){
@@ -111,6 +126,18 @@ public class TestGameClient extends SimpleApplication implements Client {
             String name = geomDeleteQueue.poll();
             terrain.detachChildNamed(name);
         }
+    }
+
+    private void setUpLight() {
+        // We add light so we see the scene
+        AmbientLight al = new AmbientLight();
+        al.setColor(ColorRGBA.White.mult(1.3f));
+        rootNode.addLight(al);
+
+        DirectionalLight dl = new DirectionalLight();
+        dl.setColor(ColorRGBA.White);
+        dl.setDirection(new Vector3f(2.8f, -2.8f, -2.8f).normalizeLocal());
+        rootNode.addLight(dl);
     }
 
     /**

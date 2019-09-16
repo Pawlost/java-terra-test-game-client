@@ -1,0 +1,28 @@
+MaterialDef BarrelDistortion {
+
+    MaterialParameters {
+        Float strength
+        Float height
+        Float cylindricalRatio
+        Float aspect
+
+        //This is our scene texture
+        Texture2D Texture
+        //This is our samples
+        Int NumSamples
+    }
+
+    Technique {
+        VertexShader GLSL120 GLSL150:   Shaders/Barrel.vert
+        FragmentShader GLSL120 GLSL150: Shaders/Barrel.frag
+
+        WorldParameters {
+            Aspect
+            WorldViewProjectionMatrix
+        }
+
+        Defines {
+
+        }
+    }
+}
