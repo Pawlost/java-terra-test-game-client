@@ -13,8 +13,8 @@ MaterialDef BarrelDistortion {
     }
 
     Technique {
-        VertexShader GLSL120 GLSL150:   Shaders/Barrel.vert
-        FragmentShader GLSL120 GLSL150: Shaders/Barrel.frag
+        VertexShader GLSL120 GLSL150:   shaders/barrel/Barrel.vert
+        FragmentShader GLSL120 GLSL150: shaders/barrel/Barrel.frag
 
         WorldParameters {
             Aspect

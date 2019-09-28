@@ -1,0 +1,16 @@
+MaterialDef Terrain {
+
+    MaterialParameters {
+        TextureArray ColorMap
+    }
+
+    Technique {
+        VertexShader GLSL150:   shaders/voxel/TerraArray.vert
+        FragmentShader GLSL150: shaders/voxel/TerraArray.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldMatrix
+        }
+    }
+}

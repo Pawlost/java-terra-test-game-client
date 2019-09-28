@@ -28,9 +28,9 @@ public class TextureManager{
     public TextureManager(AssetManager assetManager, Registry registry) {
         HashMap<Integer, Image> atlas = new HashMap<>();
         ModelLoader3D modelLoader3D = new ModelLoader3D(assetManager);
-        for (int i = 2; i <= registry.getAllMaterials().size(); i++) {
+        for (int i = 1; i < registry.getAllMaterials().size(); i++) {
             TerraObject object = registry.getForWorldId(i);
-            if (object.getTexture() != null) {
+            if (object != null && object.getTexture() != null) {
                 object.getTexture().setPosition(i);
 
                 Texture tex;

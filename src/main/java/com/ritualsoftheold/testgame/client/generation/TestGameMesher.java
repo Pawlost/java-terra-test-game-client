@@ -39,7 +39,7 @@ public class TestGameMesher {
         greedyMesher = new GreedyMesher();
         modelLoader3D = new ModelLoader3D(manager);
         unsualMeshSize = new HashMap<>();
-        mat = new Material(manager, "shaders/terra/voxel/TerraArray.j3md");
+        mat = new Material(manager, "shaders/voxel/TerraArray.j3md");
         mat.setTexture("ColorMap", array);
         mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
     }

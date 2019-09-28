@@ -40,7 +40,7 @@ public class BarrelDistortion extends Filter {
         height = FastMath.tan((FastMath.DEG_TO_RAD * horizontalFOV)/2.0f)/aspect;
         cam.setFrustumPerspective(horizontalFOV,aspect,0.001f,500f);
 //        height = cam.getFrustumTop();
-        mat = new Material(manager,"Shaders/BarrelDistortion.j3md");
+        mat = new Material(manager,"shaders/barrel/BarrelDistortion.j3md");
         mat.setFloat("strength",strength);
         mat.setFloat("height",height);
         mat.setFloat("cylindricalRatio",cylindricalRatio);

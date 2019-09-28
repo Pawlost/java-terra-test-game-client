@@ -176,6 +176,7 @@ public class TestGameClient extends SimpleApplication implements Client {
 
     @Override
     public void sendChunk(ChunkLArray chunk) {
+        chunk.setReg(this.registry);
         mesher.chunkLoaded(chunk);
     }
 }
