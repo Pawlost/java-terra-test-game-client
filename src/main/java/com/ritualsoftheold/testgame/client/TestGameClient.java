@@ -17,7 +17,6 @@ import com.ritualsoftheold.loader.config.PrimitiveResourcePack;
 import com.ritualsoftheold.terra.core.chunk.ChunkLArray;
 import com.ritualsoftheold.terra.core.materials.Registry;
 import com.ritualsoftheold.terra.core.materials.TerraModule;
-import com.ritualsoftheold.terra.core.octrees.OctreeBase;
 import com.ritualsoftheold.testgame.client.generation.TestGameMesher;
 import com.ritualsoftheold.testgame.client.generation.TextureManager;
 import com.ritualsoftheold.testgame.client.network.Client;
@@ -26,7 +25,6 @@ import com.ritualsoftheold.testgame.client.utils.InputHandler;
 import com.ritualsoftheold.testgame.client.utils.Picker;
 import com.ritualsoftheold.testgame.materials.BarrelDistortion;
 
-import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -45,9 +43,7 @@ public class TestGameClient extends SimpleApplication implements Client {
     private BlockingQueue<Spatial> geomCreateQueue = new ArrayBlockingQueue<>(10000);
     private BlockingQueue<String> geomDeleteQueue = new ArrayBlockingQueue<>(10000);
 
-    private ArrayList<OctreeBase> octrees;
-
-    public TestGameClient(Server server){
+    public TestGameClient(Server server) {
         super();
         this.server = server;
         this.showSettings = false;
@@ -60,7 +56,7 @@ public class TestGameClient extends SimpleApplication implements Client {
 
     @Override
     public void simpleInitApp() {
-       // setDisplayFps(false);
+        // setDisplayFps(false);
         //setDisplayStatView(false);
 
         terrain = new Node("Terrain");
@@ -76,27 +72,26 @@ public class TestGameClient extends SimpleApplication implements Client {
         initTextures();
         initUI();
 
-        cam.setLocation(new Vector3f(0, 0, 50));
-
         Picker picker = new Picker(rootNode);
         //picker.setGeometry(custom);
 
         // Some config options
         flyCam.setMoveSpeed(20);
 
-        InputHandler input = new InputHandler(inputManager, picker, rootNode, cam);
+        InputHandler in1put = new InputHandler(inputManager, picker, rootNode, cam);
         // input.addMaterial(material);
-        octrees = server.init(this);
+        server.init(this);
 
         setUpLight();
 
+        //Barrel distortion setup
         fpp = new FilterPostProcessor(assetManager);
         barrel = new BarrelDistortion();
         fpp.addFilter(barrel);
         viewPort.addProcessor(fpp);
     }
 
-    private void initTextures(){
+    private void initTextures() {
         texManager = new TextureManager(assetManager, registry);
 
         TextureArray atlasTexture = texManager.getTextureArray();
