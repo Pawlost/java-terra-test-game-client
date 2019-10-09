@@ -4,17 +4,24 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
+import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 
 import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
 import com.ritualsoftheold.loader.config.PrimitiveResourcePack;
 import com.ritualsoftheold.terra.core.chunk.ChunkLArray;
+import com.ritualsoftheold.terra.core.chunk.OffheapOctree;
+import com.ritualsoftheold.terra.core.markers.Marker;
+import com.ritualsoftheold.terra.core.markers.Type;
 import com.ritualsoftheold.terra.core.materials.Registry;
 import com.ritualsoftheold.terra.core.materials.TerraModule;
 import com.ritualsoftheold.testgame.client.generation.TestGameMesher;
@@ -40,7 +47,7 @@ public class TestGameClient extends SimpleApplication implements Client {
     private FilterPostProcessor fpp;
     private BarrelDistortion barrel;
 
-    private BlockingQueue<Spatial> geomCreateQueue = new ArrayBlockingQueue<>(10000);
+    private BlockingQueue<Spatial> geomCreateQueue = new ArrayBlockingQueue<>(1000000);
     private BlockingQueue<String> geomDeleteQueue = new ArrayBlockingQueue<>(10000);
 
     public TestGameClient(Server server) {
@@ -173,5 +180,26 @@ public class TestGameClient extends SimpleApplication implements Client {
     public void sendChunk(ChunkLArray chunk) {
         chunk.setReg(this.registry);
         mesher.chunkLoaded(chunk);
+    }
+
+    @Override
+    public void sendOctree(Marker octree) {
+        if (octree instanceof OffheapOctree) {
+            System.out.println("Octree generation started");
+            for (Marker marker : ((OffheapOctree) octree).getOctreeNodes()) {
+                if (marker.getType() == Type.LEAF_OCTANT) {
+                    Box box = new Box(8, 8, 8);
+                    box.setMode(Mesh.Mode.Lines);
+                    Geometry geom = new Geometry("Box:" + marker.getPosX() + " " + marker.getPosY() + " " + marker.getPosZ(), box);
+                    Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                    mat1.setColor("Color", ColorRGBA.Green);
+                    geom.setMaterial(mat1);
+                    geom.updateGeometricState();
+                    geom.setLocalTranslation(marker.getPosX() + 8, marker.getPosY() + 8, marker.getPosZ() + 8);
+                    geom.updateModelBound();
+                    geomCreateQueue.add(geom);
+                }
+            }
+        }
     }
 }
