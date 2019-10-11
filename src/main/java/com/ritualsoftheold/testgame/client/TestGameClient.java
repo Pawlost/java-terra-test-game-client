@@ -19,11 +19,11 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.TextureArray;
 import com.ritualsoftheold.loader.config.PrimitiveResourcePack;
 import com.ritualsoftheold.terra.core.chunk.ChunkLArray;
-import com.ritualsoftheold.terra.core.chunk.OffheapOctree;
 import com.ritualsoftheold.terra.core.markers.Marker;
 import com.ritualsoftheold.terra.core.markers.Type;
 import com.ritualsoftheold.terra.core.materials.Registry;
 import com.ritualsoftheold.terra.core.materials.TerraModule;
+import com.ritualsoftheold.terra.core.octrees.OffheapOctree;
 import com.ritualsoftheold.testgame.client.generation.TestGameMesher;
 import com.ritualsoftheold.testgame.client.generation.TextureManager;
 import com.ritualsoftheold.testgame.client.network.Client;
@@ -184,13 +184,14 @@ public class TestGameClient extends SimpleApplication implements Client {
 
     @Override
     public void sendOctree(Marker octree) {
-        if (octree instanceof OffheapOctree) {
+        if (octree.getType() == Type.OCTREE) {
             System.out.println("Octree generation started");
             for (Marker marker : ((OffheapOctree) octree).getOctreeNodes()) {
                 if (marker.getType() == Type.LEAF_OCTANT) {
                     Box box = new Box(8, 8, 8);
                     box.setMode(Mesh.Mode.Lines);
                     Geometry geom = new Geometry("Box:" + marker.getPosX() + " " + marker.getPosY() + " " + marker.getPosZ(), box);
+                    System.out.println(" x " + marker.getPosX() + " y " + marker.getPosY() + " z " + marker.getPosZ());
                     Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
                     mat1.setColor("Color", ColorRGBA.Green);
                     geom.setMaterial(mat1);
