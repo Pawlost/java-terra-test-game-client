@@ -192,6 +192,7 @@ public class TestGameClient extends SimpleApplication implements Client {
                     box.setMode(Mesh.Mode.Lines);
                     System.out.println(" x " + marker.getPosX() + " y " + marker.getPosY() + " z " + marker.getPosZ());
                     Geometry geom = new Geometry("Box:" + marker.getPosX() + " " + marker.getPosY() + " " + marker.getPosZ(), box);
+                    System.out.println(" x " + marker.getPosX() + " y " + marker.getPosY() + " z " + marker.getPosZ());
                     Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
                     mat1.setColor("Color", ColorRGBA.Green);
                     geom.setMaterial(mat1);
